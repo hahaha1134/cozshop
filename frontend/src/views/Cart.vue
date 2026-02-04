@@ -114,7 +114,9 @@ const checkout = () => {
 
 onMounted(async () => {
   try {
+    console.log('Fetching cart data...')
     await cartStore.fetchCart()
+    console.log('Cart data fetched successfully:', cartStore.items)
   } catch (error) {
     console.error('Failed to fetch cart:', error)
   } finally {

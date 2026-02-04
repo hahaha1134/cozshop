@@ -18,7 +18,7 @@ async def get_orders(user_id: str = Depends(get_current_user)):
         OrderResponse(
             id=str(order["_id"]),
             user_id=order["user_id"],
-            items=[
+            orderItems=[
                 OrderItem(
                     product_id=item["product_id"],
                     name=item["name"],
@@ -26,12 +26,12 @@ async def get_orders(user_id: str = Depends(get_current_user)):
                     quantity=item["quantity"],
                     image=item.get("image", "https://via.placeholder.com/300x300")
                 )
-                for item in order["items"]
+                for item in order["orderItems"]
             ],
-            total_price=order["total_price"],
+            totalPrice=order["totalPrice"],
             status=order["status"],
-            shipping_address=order["shipping_address"],
-            payment_method=order["payment_method"],
+            shippingAddress=order["shippingAddress"],
+            paymentMethod=order["paymentMethod"],
             created_at=order["created_at"]
         )
         for order in orders
@@ -47,7 +47,7 @@ async def get_all_orders(user_id: str = Depends(get_current_admin)):
         OrderResponse(
             id=str(order["_id"]),
             user_id=order["user_id"],
-            items=[
+            orderItems=[
                 OrderItem(
                     product_id=item["product_id"],
                     name=item["name"],
@@ -55,12 +55,12 @@ async def get_all_orders(user_id: str = Depends(get_current_admin)):
                     quantity=item["quantity"],
                     image=item.get("image", "https://via.placeholder.com/300x300")
                 )
-                for item in order["items"]
+                for item in order["orderItems"]
             ],
-            total_price=order["total_price"],
+            totalPrice=order["totalPrice"],
             status=order["status"],
-            shipping_address=order["shipping_address"],
-            payment_method=order["payment_method"],
+            shippingAddress=order["shippingAddress"],
+            paymentMethod=order["paymentMethod"],
             created_at=order["created_at"]
         )
         for order in orders
@@ -94,7 +94,7 @@ async def get_order(order_id: str, user_id: str = Depends(get_current_user)):
     return OrderResponse(
         id=str(order["_id"]),
         user_id=order["user_id"],
-        items=[
+        orderItems=[
             OrderItem(
                 product_id=item["product_id"],
                 name=item["name"],
@@ -102,12 +102,12 @@ async def get_order(order_id: str, user_id: str = Depends(get_current_user)):
                 quantity=item["quantity"],
                 image=item.get("image", "https://via.placeholder.com/300x300")
             )
-            for item in order["items"]
+            for item in order["orderItems"]
         ],
-        total_price=order["total_price"],
+        totalPrice=order["totalPrice"],
         status=order["status"],
-        shipping_address=order["shipping_address"],
-        payment_method=order["payment_method"],
+        shippingAddress=order["shippingAddress"],
+        paymentMethod=order["paymentMethod"],
         created_at=order["created_at"]
     )
 
@@ -129,11 +129,11 @@ async def create_order(order_data: OrderCreate, user_id: str = Depends(get_curre
     # Create order
     order_dict = {
         "user_id": user_id,
-        "items": cart["items"],
-        "total_price": total_price,
+        "orderItems": cart["items"],
+        "totalPrice": total_price,
         "status": "pending",
-        "shipping_address": order_data.shipping_address,
-        "payment_method": order_data.payment_method,
+        "shippingAddress": order_data.shipping_address,
+        "paymentMethod": order_data.payment_method,
         "created_at": datetime.utcnow()
     }
     
@@ -153,7 +153,7 @@ async def create_order(order_data: OrderCreate, user_id: str = Depends(get_curre
     return OrderResponse(
         id=str(created_order["_id"]),
         user_id=created_order["user_id"],
-        items=[
+        orderItems=[
             OrderItem(
                 product_id=item["product_id"],
                 name=item["name"],
@@ -161,12 +161,12 @@ async def create_order(order_data: OrderCreate, user_id: str = Depends(get_curre
                 quantity=item["quantity"],
                 image=item.get("image", "https://via.placeholder.com/300x300")
             )
-            for item in created_order["items"]
+            for item in created_order["orderItems"]
         ],
-        total_price=created_order["total_price"],
+        totalPrice=created_order["totalPrice"],
         status=created_order["status"],
-        shipping_address=created_order["shipping_address"],
-        payment_method=created_order["payment_method"],
+        shippingAddress=created_order["shippingAddress"],
+        paymentMethod=created_order["paymentMethod"],
         created_at=created_order["created_at"]
     )
 
