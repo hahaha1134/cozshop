@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from datetime import datetime
-from models import UserCreate, UserResponse, Token
+from models import UserCreate, UserResponse, Token, UserLogin
 from database import get_database
 from auth import get_current_user
 from bson import ObjectId
@@ -43,7 +43,7 @@ async def register(user: UserCreate):
     )
 
 @router.post("/login", response_model=Token)
-async def login(user: UserCreate):
+async def login(user: UserLogin):
     db = get_database()
     
     # Simplified: no password verification
