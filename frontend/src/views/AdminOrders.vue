@@ -101,12 +101,28 @@ const fetchOrders = async () => {
     orders.value.forEach(order => {
       orderStatuses[order.id] = order.status
     })
+    
+    // Initialize filtered orders
+    filteredOrders.value = [...orders.value]
   } catch (error) {
     console.error('Failed to fetch orders:', error)
     alert('获取订单失败')
   } finally {
     loading.value = false
   }
+}
+
+const handleSearch = () => {
+  if (!searchQuery.value) {
+    filteredOrders.value = [...orders.value]
+    return
+  }
+  
+  const query = searchQuery.value.toLowerCase()
+  filteredOrders.value = orders.value.filter(order => {
+    return order.id.toLowerCase().includes(query) || 
+           order.user_id.toLowerCase().includes(query)
+  })
 }
 
 const updateOrderStatus = async (orderId, newStatus) => {
