@@ -7,12 +7,21 @@
       </div>
       
       <div class="products-list">
+        <div class="search-bar">
+          <input 
+            v-model="searchQuery" 
+            @input="handleSearch" 
+            placeholder="按商品名称搜索..."
+            class="search-input"
+          />
+        </div>
+        
         <div v-if="loading" class="loading">
           <div class="spinner"></div>
           <p>加载中...</p>
         </div>
         
-        <div v-else-if="products.length === 0" class="empty-state">
+        <div v-else-if="filteredProducts.length === 0" class="empty-state">
           <div class="empty-icon">📦</div>
           <p>暂无商品</p>
         </div>
