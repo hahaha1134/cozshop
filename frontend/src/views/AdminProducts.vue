@@ -91,11 +91,73 @@ const fetchProducts = async () => {
   try {
     const response = await api.get('/products')
     products.value = response.data
+    filteredProducts.value = [...products.value]
   } catch (error) {
     console.error('Failed to fetch products:', error)
     alert('获取商品失败')
   } finally {
     loading.value = false
+  }
+}
+
+const handleSearch = () => {
+  if (!searchQuery.value) {
+    filteredProducts.value = [...products.value]
+    return
+  }
+  
+  const query = searchQuery.value.toLowerCase()
+  filteredProducts.value = products.value.filter(product => {
+    return product.name.toLowerCase().includes(query)
+  })
+}
+
+const getStatusText = (status) => {
+  const statusMap = {
+    pending: '待审核',
+    approved: '已通过',
+    rejected: '已驳回',
+    inactive: '已下架'
+  }
+  return statusMap[status] || '未知'
+}
+
+const toggleProductStatus = async (productId, newStatus) => {
+  try {
+    const status = newStatus ? 'approved' : 'inactive'
+    await api.put(`/products/${productId}/status`, { status })
+    alert('商品状态更新成功')
+    
+    // Update local status
+    const product = products.value.find(p => p.id === productId)
+    if (product) {
+      product.status = status
+    }
+    
+    // Refresh filtered products
+    handleSearch()
+  } catch (error) {
+    console.error('Failed to update product status:', error)
+    alert('更新商品状态失败')
+  }
+}
+
+const toggleProductPin = async (productId, newPinStatus) => {
+  try {
+    await api.put(`/products/${productId}/pin`, { is_pinned: newPinStatus })
+    alert('商品置顶状态更新成功')
+    
+    // Update local pin status
+    const product = products.value.find(p => p.id === productId)
+    if (product) {
+      product.is_pinned = newPinStatus
+    }
+    
+    // Refresh filtered products
+    handleSearch()
+  } catch (error) {
+    console.error('Failed to update product pin status:', error)
+    alert('更新商品置顶状态失败')
   }
 }
 
