@@ -149,7 +149,7 @@ async def create_announcement(title: str = Body(..., description="公告标题")
     }
 
 @router.put("/announcements/{announcement_id}")
-async def update_announcement(announcement_id: str, title: str, content: str, admin_id: str = Depends(get_current_admin)):
+async def update_announcement(announcement_id: str, title: str = Body(..., description="公告标题"), content: str = Body(..., description="公告内容"), admin_id: str = Depends(get_current_admin)):
     db = get_database()
     
     result = await db.announcements.update_one(
