@@ -56,32 +56,57 @@
               <label for="address">收货地址</label>
               <textarea
                 id="address"
-                v-model="orderData.address"
+                v-model="orderData.shippingAddress.address"
                 required
-                placeholder="请输入收货地址"
+                placeholder="请输入详细地址"
                 rows="3"
               ></textarea>
             </div>
             
             <div class="form-group">
-              <label for="phone">联系电话</label>
+              <label for="city">城市</label>
               <input
-                id="phone"
-                v-model="orderData.phone"
-                type="tel"
+                id="city"
+                v-model="orderData.shippingAddress.city"
+                type="text"
                 required
-                placeholder="请输入联系电话"
+                placeholder="请输入城市"
               />
             </div>
             
             <div class="form-group">
-              <label for="notes">备注（可选）</label>
-              <textarea
-                id="notes"
-                v-model="orderData.notes"
-                placeholder="订单备注"
-                rows="2"
-              ></textarea>
+              <label for="postalCode">邮编</label>
+              <input
+                id="postalCode"
+                v-model="orderData.shippingAddress.postalCode"
+                type="text"
+                required
+                placeholder="请输入邮编"
+              />
+            </div>
+            
+            <div class="form-group">
+              <label for="country">国家</label>
+              <input
+                id="country"
+                v-model="orderData.shippingAddress.country"
+                type="text"
+                required
+                placeholder="请输入国家"
+              />
+            </div>
+            
+            <div class="form-group">
+              <label for="paymentMethod">支付方式</label>
+              <select
+                id="paymentMethod"
+                v-model="orderData.paymentMethod"
+                required
+              >
+                <option value="Credit Card">信用卡</option>
+                <option value="PayPal">PayPal</option>
+                <option value="Bank Transfer">银行转账</option>
+              </select>
             </div>
             
             <button 
@@ -111,23 +136,19 @@ const loading = ref(true)
 const submitting = ref(false)
 
 const orderData = ref({
-  address: '',
-  phone: '',
-  notes: ''
+  shippingAddress: {
+    address: '',
+    city: '',
+    postalCode: '',
+    country: ''
+  },
+  paymentMethod: 'Credit Card'
 })
 
 const handleCheckout = async () => {
   submitting.value = true
   try {
-    const response = await api.post('/orders', {
-      items: cartStore.items.map(item => ({
-        product_id: item.product_id,
-        quantity: item.quantity
-      })),
-      address: orderData.value.address,
-      phone: orderData.value.phone,
-      notes: orderData.value.notes
-    })
+    const response = await api.post('/orders', orderData.value)
     
     await cartStore.clearCart()
     router.push(`/orders`)

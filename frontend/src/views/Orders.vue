@@ -47,7 +47,7 @@
           <div class="order-footer">
             <div class="order-total">
               <span>订单总计:</span>
-              <span>¥{{ order.total_price.toFixed(2) }}</span>
+              <span>¥{{ order.totalPrice.toFixed(2) }}</span>
             </div>
             <div class="order-actions">
               <button class="btn btn-secondary btn-sm">查看详情</button>

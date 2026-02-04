@@ -187,7 +187,8 @@ const submitReview = async () => {
     await fetchReviews() // 刷新评价列表
   } catch (error) {
     console.error('Failed to submit review:', error)
-    alert('提交失败，请重试。您只能评价已购买的商品。')
+    const errorMessage = error.response?.data?.detail || '提交失败，请重试'
+    alert(errorMessage)
   }
 }
 

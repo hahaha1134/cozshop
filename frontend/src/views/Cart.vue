@@ -14,12 +14,20 @@
       </div>
       
       <div v-else class="cart-content">
-        <div class="cart-items">
-          <div 
-            v-for="item in cartStore.items" 
-            :key="item.product_id"
-            class="cart-item card"
-          >
+        <div class="cart-actions">
+            <button 
+              class="btn btn-danger btn-sm"
+              @click="handleClearCart"
+            >
+              清空购物车
+            </button>
+          </div>
+          <div class="cart-items">
+            <div 
+              v-for="item in cartStore.items" 
+              :key="item.product_id"
+              class="cart-item card"
+            >
             <img :src="item.image" :alt="item.name" class="item-image" />
             <div class="item-details">
               <h3 class="item-name">{{ item.name }}</h3>
@@ -110,6 +118,18 @@ const removeFromCart = async (productId) => {
 
 const checkout = () => {
   router.push('/orders')
+}
+
+const handleClearCart = async () => {
+  if (confirm('确定要清空购物车吗？')) {
+    try {
+      await cartStore.clearCart()
+      alert('购物车已清空')
+    } catch (error) {
+      console.error('Failed to clear cart:', error)
+      alert('清空购物车失败，请重试')
+    }
+  }
 }
 
 onMounted(async () => {
