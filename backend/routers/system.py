@@ -130,7 +130,7 @@ async def get_announcements(admin_id: str = Depends(get_current_admin)):
     return result
 
 @router.post("/announcements")
-async def create_announcement(title: str, content: str, admin_id: str = Depends(get_current_admin)):
+async def create_announcement(title: str = Body(..., description="公告标题"), content: str = Body(..., description="公告内容"), admin_id: str = Depends(get_current_admin)):
     db = get_database()
     
     announcement = {
