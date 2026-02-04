@@ -7,12 +7,21 @@
       </div>
       
       <div class="orders-list">
+        <div class="search-bar">
+          <input 
+            v-model="searchQuery" 
+            @input="handleSearch" 
+            placeholder="按订单号/用户名搜索订单..."
+            class="search-input"
+          />
+        </div>
+        
         <div v-if="loading" class="loading">
           <div class="spinner"></div>
           <p>加载中...</p>
         </div>
         
-        <div v-else-if="orders.length === 0" class="empty-state">
+        <div v-else-if="filteredOrders.length === 0" class="empty-state">
           <div class="empty-icon">📋</div>
           <p>暂无订单</p>
         </div>
