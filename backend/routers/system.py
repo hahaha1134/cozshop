@@ -111,3 +111,101 @@ async def get_system_statistics(admin_id: str = Depends(get_current_admin)):
         "monthly_sales": sales_data,
         "top_products": top_products
     }
+
+@router.get("/announcements")
+async def get_announcements(admin_id: str = Depends(get_current_admin)):
+    db = get_database()
+    announcements = await db.announcements.find().sort("created_at", -1).to_list(length=100)
+    
+    # Convert to response format
+    result = []
+    for announcement in announcements:
+        result.append({
+            "id": str(announcement["_id"]),
+            "title": announcement["title"],
+            "content": announcement["content"],
+            "created_at": announcement["created_at"]
+        })
+    
+    return result
+
+@router.post("/announcements")
+async def create_announcement(title: str, content: str, admin_id: str = Depends(get_current_admin)):
+    db = get_database()
+    
+    announcement = {
+        "title": title,
+        "content": content,
+        "created_at": datetime.utcnow()
+    }
+    
+    result = await db.announcements.insert_one(announcement)
+    
+    return {
+        "id": str(result.inserted_id),
+        "title": title,
+        "content": content,
+        "created_at": announcement["created_at"]
+    }
+
+@router.put("/announcements/{announcement_id}")
+async def update_announcement(announcement_id: str, title: str, content: str, admin_id: str = Depends(get_current_admin)):
+    db = get_database()
+    
+    result = await db.announcements.update_one(
+        {"_id": ObjectId(announcement_id)},
+        {"$set": {"title": title, "content": content}}
+    )
+    
+    if result.modified_count == 0:
+        from fastapi import HTTPException, status
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Announcement not found"
+        )
+    
+    return {"message": "Announcement updated successfully"}
+
+@router.delete("/announcements/{announcement_id}")
+async def delete_announcement(announcement_id: str, admin_id: str = Depends(get_current_admin)):
+    db = get_database()
+    
+    result = await db.announcements.delete_one({"_id": ObjectId(announcement_id)})
+    
+    if result.deleted_count == 0:
+        from fastapi import HTTPException, status
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Announcement not found"
+        )
+    
+    return {"message": "Announcement deleted successfully"}
+
+@router.post("/cleanup")
+async def cleanup_invalid_data(admin_id: str = Depends(get_current_admin)):
+    db = get_database()
+    
+    # Cleanup incomplete orders (older than 24 hours)
+    twenty_four_hours_ago = datetime.utcnow() - timedelta(hours=24)
+    incomplete_orders = await db.orders.delete_many(
+        {"status": "pending", "created_at": {"$lt": twenty_four_hours_ago}}
+    )
+    
+    # Cleanup invalid user accounts (no email or name)
+    invalid_users = await db.users.delete_many(
+        {"$or": [{"email": {"$exists": False}}, {"name": {"$exists": False}}]}
+    )
+    
+    # Cleanup products with no name or price
+    invalid_products = await db.products.delete_many(
+        {"$or": [{"name": {"$exists": False}}, {"price": {"$exists": False}}]}
+    )
+    
+    return {
+        "message": "Data cleanup completed",
+        "cleaned": {
+            "incomplete_orders": incomplete_orders.deleted_count,
+            "invalid_users": invalid_users.deleted_count,
+            "invalid_products": invalid_products.deleted_count
+        }
+    }
