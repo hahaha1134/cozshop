@@ -31,7 +31,7 @@
           
           <div class="order-items">
             <div 
-              v-for="item in order.items" 
+              v-for="item in order.orderItems" 
               :key="item.product_id"
               class="order-item"
             >
