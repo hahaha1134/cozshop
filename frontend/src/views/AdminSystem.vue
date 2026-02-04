@@ -176,6 +176,12 @@ const authStore = useAuthStore()
 const loading = ref(true)
 const systemStatus = ref({})
 const systemStats = ref({})
+const announcements = ref([])
+const showAnnouncementForm = ref(false)
+const announcementForm = ref({ title: '', content: '' })
+const editingAnnouncement = ref(null)
+const savingAnnouncement = ref(false)
+const cleaningData = ref(false)
 
 onMounted(async () => {
   // Check if user is admin
@@ -187,6 +193,7 @@ onMounted(async () => {
   
   await fetchSystemStatus()
   await fetchSystemStats()
+  await fetchAnnouncements()
 })
 
 const fetchSystemStatus = async () => {
@@ -206,6 +213,78 @@ const fetchSystemStats = async () => {
   } catch (error) {
     console.error('Failed to fetch system statistics:', error)
     alert('获取系统统计数据失败')
+  }
+}
+
+const fetchAnnouncements = async () => {
+  try {
+    const response = await api.get('/system/announcements')
+    announcements.value = response.data
+  } catch (error) {
+    console.error('Failed to fetch announcements:', error)
+    // 静默失败，因为这可能是新功能
+  }
+}
+
+const saveAnnouncement = async () => {
+  savingAnnouncement.value = true
+  try {
+    if (editingAnnouncement.value) {
+      // Edit existing announcement
+      await api.put(`/system/announcements/${editingAnnouncement.value.id}`, announcementForm.value)
+      alert('公告更新成功')
+    } else {
+      // Create new announcement
+      await api.post('/system/announcements', announcementForm.value)
+      alert('公告发布成功')
+    }
+    await fetchAnnouncements()
+    showAnnouncementForm.value = false
+    resetAnnouncementForm()
+  } catch (error) {
+    console.error('Failed to save announcement:', error)
+    alert('保存公告失败')
+  } finally {
+    savingAnnouncement.value = false
+  }
+}
+
+const editAnnouncement = (announcement) => {
+  editingAnnouncement.value = announcement
+  announcementForm.value = { ...announcement }
+  showAnnouncementForm.value = true
+}
+
+const deleteAnnouncement = async (announcementId) => {
+  if (confirm('确定要删除此公告吗？')) {
+    try {
+      await api.delete(`/system/announcements/${announcementId}`)
+      alert('公告删除成功')
+      await fetchAnnouncements()
+    } catch (error) {
+      console.error('Failed to delete announcement:', error)
+      alert('删除公告失败')
+    }
+  }
+}
+
+const resetAnnouncementForm = () => {
+  announcementForm.value = { title: '', content: '' }
+  editingAnnouncement.value = null
+}
+
+const cleanupInvalidData = async () => {
+  if (confirm('确定要清理平台无效数据吗？此操作不可恢复。')) {
+    cleaningData.value = true
+    try {
+      await api.post('/system/cleanup')
+      alert('数据清理成功')
+    } catch (error) {
+      console.error('Failed to cleanup data:', error)
+      alert('数据清理失败')
+    } finally {
+      cleaningData.value = false
+    }
   }
 }
 
