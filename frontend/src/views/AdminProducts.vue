@@ -72,6 +72,8 @@ import api from '@/utils/api'
 const authStore = useAuthStore()
 const router = useRouter()
 const products = ref([])
+const filteredProducts = ref([])
+const searchQuery = ref('')
 const loading = ref(true)
 
 onMounted(async () => {
