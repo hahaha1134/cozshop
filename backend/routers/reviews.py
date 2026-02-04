@@ -61,7 +61,7 @@ async def create_review(review: ReviewCreate, user_id: str = Depends(get_current
     # Check if user has purchased this product
     has_purchased = await db.orders.find_one({
         "user_id": user_id,
-        "items": {
+        "orderItems": {
             "$elemMatch": {
                 "product_id": review.product_id
             }
