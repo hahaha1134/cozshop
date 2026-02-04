@@ -106,11 +106,15 @@ const editProduct = (product) => {
 const deleteProduct = async (productId) => {
   if (confirm('确定要删除这个商品吗？')) {
     try {
-      await api.delete(`/products/${productId}`)
-      fetchProducts()
+      console.log('Deleting product:', productId)
+      const response = await api.delete(`/products/${productId}`)
+      console.log('Delete response:', response)
+      await fetchProducts()
+      console.log('Products fetched after delete')
       alert('商品删除成功！')
     } catch (error) {
       console.error('Failed to delete product:', error)
+      console.error('Error details:', error.response)
       alert('删除失败，请重试')
     }
   }

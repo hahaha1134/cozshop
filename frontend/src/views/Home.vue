@@ -125,6 +125,12 @@ const maxPrice = ref(null)
 const fetchProducts = async () => {
   loading.value = true
   try {
+    console.log('Fetching products with params:', {
+      search: searchQuery.value,
+      category: selectedCategory.value,
+      min_price: minPrice.value,
+      max_price: maxPrice.value
+    })
     // Build query params
     const params = {}
     
@@ -145,6 +151,8 @@ const fetchProducts = async () => {
     }
     
     const response = await api.get('/products', { params })
+    console.log('Products fetched:', response.data.length)
+    console.log('First product:', response.data[0])
     products.value = response.data
   } catch (error) {
     console.error('Failed to fetch products:', error)

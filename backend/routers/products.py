@@ -174,15 +174,29 @@ async def delete_product(product_id: str, user_id: str = Depends(get_current_use
     print(f"Delete product request received: product_id={product_id}, user_id={user_id}")
     
     try:
-        # Try to convert product_id to ObjectId
-        product_object_id = ObjectId(product_id)
-        print(f"Converted product_id to ObjectId: {product_object_id}")
+        # Get user to check role
+        user = await db.users.find_one({"_id": ObjectId(user_id)})
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found"
+            )
         
-        # Get product
-        product = await db.products.find_one({"_id": product_object_id})
-        print(f"Product found: {product}")
+        # Get all products
+        all_products = await db.products.find({}).to_list(length=100)
+        print(f"All products count: {len(all_products)}")
         
-        if not product:
+        # Find the product to delete
+        product_to_delete = None
+        for product in all_products:
+            print(f"  Checking product: {product['name']}, ID: {product['_id']}, Type: {type(product['_id'])}")
+            # Check if product ID matches (either as ObjectId or string)
+            if str(product['_id']) == product_id:
+                product_to_delete = product
+                print(f"  Found product to delete: {product['name']}")
+                break
+        
+        if not product_to_delete:
             print(f"Product not found: {product_id}")
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -190,10 +204,7 @@ async def delete_product(product_id: str, user_id: str = Depends(get_current_use
             )
         
         # Check if user is the seller or admin
-        user = await db.users.find_one({"_id": ObjectId(user_id)})
-        print(f"User found: {user}")
-        
-        seller_id = product.get("seller_id")
+        seller_id = product_to_delete.get("seller_id")
         user_role = user.get("role")
         print(f"Seller ID: {seller_id}, User ID: {user_id}, User Role: {user_role}")
         
@@ -204,8 +215,8 @@ async def delete_product(product_id: str, user_id: str = Depends(get_current_use
                 detail="Not authorized to delete this product"
             )
         
-        # Delete product
-        result = await db.products.delete_one({"_id": product_object_id})
+        # Delete the product
+        result = await db.products.delete_one({"_id": product_to_delete["_id"]})
         print(f"Delete result: {result}")
         print(f"Deleted count: {result.deleted_count}")
         
@@ -220,6 +231,8 @@ async def delete_product(product_id: str, user_id: str = Depends(get_current_use
         return {"message": "Product deleted successfully"}
     except Exception as e:
         print(f"Error deleting product: {e}")
+        import traceback
+        traceback.print_exc()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error deleting product: {str(e)}"
