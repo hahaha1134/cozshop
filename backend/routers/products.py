@@ -170,30 +170,60 @@ async def update_product(product_id: str, product_update: ProductUpdate, user_id
 @router.delete("/{product_id}")
 async def delete_product(product_id: str, user_id: str = Depends(get_current_user)):
     db = get_database()
+    
+    print(f"Delete product request received: product_id={product_id}, user_id={user_id}")
+    
     try:
-        product = await db.products.find_one({"_id": ObjectId(product_id)})
-    except:
+        # Try to convert product_id to ObjectId
+        product_object_id = ObjectId(product_id)
+        print(f"Converted product_id to ObjectId: {product_object_id}")
+        
+        # Get product
+        product = await db.products.find_one({"_id": product_object_id})
+        print(f"Product found: {product}")
+        
+        if not product:
+            print(f"Product not found: {product_id}")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Product not found"
+            )
+        
+        # Check if user is the seller or admin
+        user = await db.users.find_one({"_id": ObjectId(user_id)})
+        print(f"User found: {user}")
+        
+        seller_id = product.get("seller_id")
+        user_role = user.get("role")
+        print(f"Seller ID: {seller_id}, User ID: {user_id}, User Role: {user_role}")
+        
+        if seller_id != user_id and user_role != "admin":
+            print(f"Not authorized to delete product: seller_id={seller_id}, user_id={user_id}, user_role={user_role}")
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Not authorized to delete this product"
+            )
+        
+        # Delete product
+        result = await db.products.delete_one({"_id": product_object_id})
+        print(f"Delete result: {result}")
+        print(f"Deleted count: {result.deleted_count}")
+        
+        if result.deleted_count == 0:
+            print(f"No product deleted: {product_id}")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Product not found"
+            )
+        
+        print(f"Product deleted successfully: {product_id}")
+        return {"message": "Product deleted successfully"}
+    except Exception as e:
+        print(f"Error deleting product: {e}")
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Product not found"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error deleting product: {str(e)}"
         )
-    
-    if not product:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Product not found"
-        )
-    
-    # Check if user is the seller or admin
-    user = await db.users.find_one({"_id": ObjectId(user_id)})
-    if product.get("seller_id") != user_id and user.get("role") != "admin":
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Not authorized to delete this product"
-        )
-    
-    await db.products.delete_one({"_id": ObjectId(product_id)})
-    return {"message": "Product deleted successfully"}
 
 @router.put("/{product_id}/status")
 async def update_product_status(product_id: str, status_data: dict = Body(..., description="状态数据"), user_id: str = Depends(get_current_admin)):
