@@ -226,8 +226,10 @@ async def update_product_status(product_id: str, status: str, user_id: str = Dep
     return {"message": "Product status updated successfully"}
 
 @router.put("/{product_id}/pin")
-async def update_product_pin(product_id: str, is_pinned: bool = Body(..., description="是否置顶"), user_id: str = Depends(get_current_admin)):
+async def update_product_pin(product_id: str, pin_data: dict = Body(..., description="置顶数据"), user_id: str = Depends(get_current_admin)):
     db = get_database()
+    
+    is_pinned = pin_data.get("is_pinned", False)
     
     try:
         result = await db.products.update_one(
