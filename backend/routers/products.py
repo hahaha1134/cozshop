@@ -196,9 +196,10 @@ async def delete_product(product_id: str, user_id: str = Depends(get_current_use
     return {"message": "Product deleted successfully"}
 
 @router.put("/{product_id}/status")
-async def update_product_status(product_id: str, status: str = Body(..., description="商品状态"), user_id: str = Depends(get_current_admin)):
+async def update_product_status(product_id: str, status_data: dict = Body(..., description="状态数据"), user_id: str = Depends(get_current_admin)):
     db = get_database()
     
+    status = status_data.get("status")
     valid_statuses = ["pending", "approved", "rejected", "inactive"]
     if status not in valid_statuses:
         raise HTTPException(
