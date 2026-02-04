@@ -36,31 +36,100 @@
             <div class="stat-item">
               <div class="stat-icon">👥</div>
               <div class="stat-info">
-                <div class="stat-value">{{ systemStats.statistics.total_users }}</div>
+                <div class="stat-value">{{ systemStats.statistics?.total_users || 0 }}</div>
                 <div class="stat-label">总用户数</div>
               </div>
             </div>
             <div class="stat-item">
               <div class="stat-icon">📦</div>
               <div class="stat-info">
-                <div class="stat-value">{{ systemStats.statistics.total_products }}</div>
+                <div class="stat-value">{{ systemStats.statistics?.total_products || 0 }}</div>
                 <div class="stat-label">总商品数</div>
               </div>
             </div>
             <div class="stat-item">
               <div class="stat-icon">📋</div>
               <div class="stat-info">
-                <div class="stat-value">{{ systemStats.statistics.total_orders }}</div>
+                <div class="stat-value">{{ systemStats.statistics?.total_orders || 0 }}</div>
                 <div class="stat-label">总订单数</div>
               </div>
             </div>
             <div class="stat-item">
               <div class="stat-icon">💰</div>
               <div class="stat-info">
-                <div class="stat-value">¥{{ systemStats.statistics.total_revenue }}</div>
+                <div class="stat-value">¥{{ systemStats.statistics?.total_revenue || 0 }}</div>
                 <div class="stat-label">总收入</div>
               </div>
             </div>
+          </div>
+        </div>
+        
+        <!-- System Announcements -->
+        <div class="announcements-card">
+          <h2>系统公告管理</h2>
+          <div class="announcement-actions">
+            <button @click="showAnnouncementForm = true" class="btn btn-primary">发布新公告</button>
+          </div>
+          <div v-if="announcements.length === 0" class="empty-announcements">
+            <p>暂无系统公告</p>
+          </div>
+          <div v-else class="announcements-list">
+            <div v-for="announcement in announcements" :key="announcement.id" class="announcement-item">
+              <div class="announcement-content">
+                <h3>{{ announcement.title }}</h3>
+                <p>{{ announcement.content }}</p>
+                <span class="announcement-date">{{ formatDate(announcement.created_at) }}</span>
+              </div>
+              <div class="announcement-actions">
+                <button @click="editAnnouncement(announcement)" class="btn btn-primary btn-sm">编辑</button>
+                <button @click="deleteAnnouncement(announcement.id)" class="btn btn-danger btn-sm">删除</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Data Management -->
+        <div class="data-card">
+          <h2>数据管理</h2>
+          <div class="data-actions">
+            <button @click="cleanupInvalidData" class="btn btn-danger" :disabled="cleaningData">
+              {{ cleaningData ? '清理中...' : '清理无效数据' }}
+            </button>
+          </div>
+          <p class="data-info">清理平台无效数据，包括未完成的订单、无效的用户账号等。</p>
+        </div>
+        
+        <!-- Announcement Form Modal -->
+        <div v-if="showAnnouncementForm" class="modal-overlay" @click="showAnnouncementForm = false">
+          <div class="modal-content" @click.stop>
+            <h3>{{ editingAnnouncement ? '编辑公告' : '发布新公告' }}</h3>
+            <form @submit.prevent="saveAnnouncement">
+              <div class="form-group">
+                <label for="announcement-title">标题</label>
+                <input 
+                  id="announcement-title" 
+                  v-model="announcementForm.title" 
+                  required 
+                  class="form-input"
+                />
+              </div>
+              <div class="form-group">
+                <label for="announcement-content">内容</label>
+                <textarea 
+                  id="announcement-content" 
+                  v-model="announcementForm.content" 
+                  required 
+                  rows="4"
+                  class="form-textarea"
+                ></textarea>
+              </div>
+              <div class="form-actions">
+                <button type="button" @click="showAnnouncementForm = false" class="btn btn-secondary">取消</button>
+                <button type="submit" class="btn btn-primary" :disabled="savingAnnouncement">
+                  {{ savingAnnouncement ? '保存中...' : '保存' }}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
         
