@@ -112,6 +112,37 @@ async def get_system_statistics(admin_id: str = Depends(get_current_admin)):
         "top_products": top_products
     }
 
+@router.get("/today")
+async def get_today_stats(admin_id: str = Depends(get_current_admin)):
+    db = get_database()
+    
+    # Get today's date (start and end)
+    today_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+    today_end = datetime.utcnow().replace(hour=23, minute=59, second=59, microsecond=999999)
+    
+    # Get today's new products
+    today_products = await db.products.count_documents({
+        "created_at": {"$gte": today_start, "$lte": today_end}
+    })
+    
+    # Get today's new orders
+    today_orders = await db.orders.count_documents({
+        "created_at": {"$gte": today_start, "$lte": today_end}
+    })
+    
+    # Get today's new users
+    today_users = await db.users.count_documents({
+        "created_at": {"$gte": today_start, "$lte": today_end}
+    })
+    
+    return {
+        "today": {
+            "products": today_products,
+            "orders": today_orders,
+            "users": today_users
+        }
+    }
+
 @router.get("/announcements")
 async def get_announcements(admin_id: str = Depends(get_current_admin)):
     db = get_database()
