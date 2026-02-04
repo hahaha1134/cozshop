@@ -233,20 +233,39 @@ async def update_product_pin(product_id: str, pin_data: dict = Body(..., descrip
     is_pinned = pin_data.get("is_pinned", False)
     
     try:
+        # Try to convert product_id to ObjectId
+        product_object_id = ObjectId(product_id)
+        print(f"Product ID: {product_id}")
+        print(f"ObjectId: {product_object_id}")
+        
+        # First check if product exists
+        product = await db.products.find_one({"_id": product_object_id})
+        print(f"Product found: {product}")
+        
+        if not product:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Product not found"
+            )
+        
+        # Update product pin status
         result = await db.products.update_one(
-            {"_id": ObjectId(product_id)},
+            {"_id": product_object_id},
             {"$set": {"is_pinned": is_pinned}}
         )
-    except:
+        
+        print(f"Update result: {result}")
+        
+        if result.modified_count == 0:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Product not found"
+            )
+        
+        return {"message": "Product pin status updated successfully"}
+    except Exception as e:
+        print(f"Error: {e}")
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Product not found"
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Error: {str(e)}"
         )
-    
-    if result.modified_count == 0:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Product not found"
-        )
-    
-    return {"message": "Product pin status updated successfully"}
