@@ -256,8 +256,8 @@ async def update_product_pin(product_id: str, pin_data: dict = Body(..., descrip
         
         print(f"Update result: {result}")
         
-        # Check if product exists (updatedExisting will be True if product was found)
-        if not result.updatedExisting:
+        # Check if product exists (matched_count > 0 if product was found)
+        if result.matched_count == 0:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Product not found"
