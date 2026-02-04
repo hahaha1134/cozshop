@@ -43,6 +43,48 @@ const routes = [
     name: 'Register',
     component: () => import('@/views/Register.vue'),
     meta: { title: '注册 - CozShop', guest: true }
+  },
+  {
+    path: '/product/create',
+    name: 'ProductCreate',
+    component: () => import('@/views/ProductCreate.vue'),
+    meta: { title: '发布商品 - CozShop', requiresAuth: true }
+  },
+  {
+    path: '/product/manage',
+    name: 'ProductManage',
+    component: () => import('@/views/ProductManage.vue'),
+    meta: { title: '商品管理 - CozShop', requiresAuth: true }
+  },
+  {
+    path: '/product/edit/:id',
+    name: 'ProductEdit',
+    component: () => import('@/views/ProductEdit.vue'),
+    meta: { title: '编辑商品 - CozShop', requiresAuth: true }
+  },
+  {
+    path: '/admin',
+    name: 'Admin',
+    component: () => import('@/views/Admin.vue'),
+    meta: { title: '管理后台 - CozShop', requiresAuth: true }
+  },
+  {
+    path: '/admin/products',
+    name: 'AdminProducts',
+    component: () => import('@/views/AdminProducts.vue'),
+    meta: { title: '商品管理 - CozShop', requiresAuth: true }
+  },
+  {
+    path: '/admin/orders',
+    name: 'AdminOrders',
+    component: () => import('@/views/AdminOrders.vue'),
+    meta: { title: '订单管理 - CozShop', requiresAuth: true }
+  },
+  {
+    path: '/favorites',
+    name: 'Favorites',
+    component: () => import('@/views/Favorites.vue'),
+    meta: { title: '我的收藏 - CozShop', requiresAuth: true }
   }
 ]
 

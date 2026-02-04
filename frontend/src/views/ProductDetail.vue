@@ -60,7 +60,60 @@
             >
               {{ authStore.isAuthenticated ? '加入购物车' : '请先登录' }}
             </button>
-            <router-link to="/" class="btn btn-secondary btn-lg">返回首页</router-link>
+            <button 
+              class="btn btn-secondary btn-lg"
+              @click="toggleFavorite"
+              :disabled="!authStore.isAuthenticated"
+              :class="{ 'btn-danger': isFavorite }"
+            >
+              {{ isFavorite ? '❤️ 已收藏' : '🤍 收藏' }}
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Reviews Section -->
+      <div class="reviews-section">
+        <h2 class="reviews-title">商品评价</h2>
+        
+        <!-- Add Review Form -->
+        <div class="add-review" v-if="authStore.isAuthenticated">
+          <h3>添加评价</h3>
+          <form @submit.prevent="submitReview">
+            <div class="form-group">
+              <label>评分</label>
+              <div class="rating-input">
+                <span v-for="i in 5" :key="i" class="star" @click="reviewRating = i">
+                  {{ i <= reviewRating ? '★' : '☆' }}
+                </span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="review-comment">评价内容</label>
+              <textarea id="review-comment" v-model="reviewComment" rows="4" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">提交评价</button>
+          </form>
+        </div>
+        
+        <!-- Reviews List -->
+        <div class="reviews-list">
+          <div v-if="reviews.length === 0" class="no-reviews">
+            暂无评价，快来成为第一个评价的人吧！
+          </div>
+          <div v-for="review in reviews" :key="review.id" class="review-item">
+            <div class="review-header">
+              <div class="review-rating">
+                <span v-for="i in 5" :key="i" class="star">
+                  {{ i <= review.rating ? '★' : '☆' }}
+                </span>
+              </div>
+              <span class="review-date">{{ formatDate(review.created_at) }}</span>
+            </div>
+            <div class="review-comment">{{ review.comment }}</div>
+            <button v-if="authStore.isAuthenticated && review.user_id === authStore.user.id" @click="deleteReview(review.id)" class="btn btn-danger btn-sm">
+              删除
+            </button>
           </div>
         </div>
       </div>
@@ -69,11 +122,13 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useCartStore } from '@/stores/cart'
 import api from '@/utils/api'
+import { reviewApi } from '@/utils/reviewApi'
+import { favoriteApi } from '@/utils/favoriteApi'
 
 const route = useRoute()
 const router = useRouter()
@@ -83,6 +138,10 @@ const cartStore = useCartStore()
 const product = ref(null)
 const loading = ref(true)
 const quantity = ref(1)
+const reviews = ref([])
+const reviewRating = ref(5)
+const reviewComment = ref('')
+const isFavorite = ref(false)
 
 const fetchProduct = async () => {
   try {
@@ -92,6 +151,15 @@ const fetchProduct = async () => {
     console.error('Failed to fetch product:', error)
   } finally {
     loading.value = false
+  }
+}
+
+const fetchReviews = async () => {
+  try {
+    const response = await reviewApi.getProductReviews(route.params.id)
+    reviews.value = response
+  } catch (error) {
+    console.error('Failed to fetch reviews:', error)
   }
 }
 
@@ -105,8 +173,80 @@ const addToCart = async () => {
   }
 }
 
+const submitReview = async () => {
+  try {
+    await reviewApi.createReview({
+      product_id: route.params.id,
+      rating: reviewRating.value,
+      comment: reviewComment.value
+    })
+    alert('评价提交成功！')
+    reviewRating.value = 5
+    reviewComment.value = ''
+    await fetchProduct() // 刷新商品信息以更新评分
+    await fetchReviews() // 刷新评价列表
+  } catch (error) {
+    console.error('Failed to submit review:', error)
+    alert('提交失败，请重试。您只能评价已购买的商品。')
+  }
+}
+
+const deleteReview = async (reviewId) => {
+  if (confirm('确定要删除这条评价吗？')) {
+    try {
+      await reviewApi.deleteReview(reviewId)
+      alert('评价删除成功！')
+      await fetchProduct() // 刷新商品信息以更新评分
+      await fetchReviews() // 刷新评价列表
+    } catch (error) {
+      console.error('Failed to delete review:', error)
+      alert('删除失败，请重试')
+    }
+  }
+}
+
+const formatDate = (dateString) => {
+  const date = new Date(dateString)
+  return date.toLocaleDateString()
+}
+
+const checkFavoriteStatus = async () => {
+  if (authStore.isAuthenticated) {
+    try {
+      const response = await favoriteApi.checkFavorite(route.params.id)
+      isFavorite.value = response.is_favorite
+    } catch (error) {
+      console.error('Failed to check favorite status:', error)
+    }
+  }
+}
+
+const toggleFavorite = async () => {
+  if (!authStore.isAuthenticated) {
+    alert('请先登录')
+    return
+  }
+  
+  try {
+    if (isFavorite.value) {
+      await favoriteApi.removeFromFavorites(route.params.id)
+      isFavorite.value = false
+      alert('已取消收藏')
+    } else {
+      await favoriteApi.addToFavorites(route.params.id)
+      isFavorite.value = true
+      alert('收藏成功')
+    }
+  } catch (error) {
+    console.error('Failed to toggle favorite:', error)
+    alert('操作失败，请重试')
+  }
+}
+
 onMounted(() => {
   fetchProduct()
+  fetchReviews()
+  checkFavoriteStatus()
 })
 </script>
 
@@ -238,6 +378,123 @@ onMounted(() => {
   margin-top: 20px;
 }
 
+/* Reviews Section Styles */
+.reviews-section {
+  margin-top: 60px;
+  padding-top: 40px;
+  border-top: 1px solid var(--border-color);
+}
+
+.reviews-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 30px;
+  color: var(--text-primary);
+}
+
+.add-review {
+  background: var(--bg-secondary);
+  padding: 30px;
+  border-radius: 12px;
+  margin-bottom: 40px;
+  box-shadow: var(--shadow-sm);
+}
+
+.add-review h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: var(--text-primary);
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.rating-input {
+  display: flex;
+  gap: 10px;
+}
+
+.rating-input .star {
+  font-size: 24px;
+  color: #ecc94b;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.rating-input .star:hover {
+  transform: scale(1.2);
+}
+
+textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  resize: vertical;
+  font-family: inherit;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.no-reviews {
+  text-align: center;
+  padding: 40px;
+  background: var(--bg-secondary);
+  border-radius: 12px;
+  color: var(--text-secondary);
+  font-size: 16px;
+}
+
+.reviews-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.review-item {
+  background: var(--bg-secondary);
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+}
+
+.review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.review-rating {
+  display: flex;
+  gap: 5px;
+}
+
+.review-rating .star {
+  font-size: 16px;
+  color: #ecc94b;
+}
+
+.review-date {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.review-comment {
+  line-height: 1.6;
+  color: var(--text-primary);
+  margin-bottom: 16px;
+}
+
 @media (max-width: 768px) {
   .product-content {
     grid-template-columns: 1fr;
@@ -257,6 +514,19 @@ onMounted(() => {
   
   .product-actions {
     flex-direction: column;
+  }
+  
+  .reviews-section {
+    margin-top: 40px;
+    padding-top: 30px;
+  }
+  
+  .add-review {
+    padding: 20px;
+  }
+  
+  .review-item {
+    padding: 20px;
   }
 }
 </style>

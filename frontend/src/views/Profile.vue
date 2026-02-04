@@ -41,6 +41,27 @@
               <p>管理购物车商品</p>
             </div>
           </router-link>
+          <router-link to="/product/manage" class="action-card">
+            <div class="action-icon">📋</div>
+            <div class="action-text">
+              <h3>我的商品</h3>
+              <p>管理发布的商品</p>
+            </div>
+          </router-link>
+          <router-link to="/product/create" class="action-card">
+            <div class="action-icon">➕</div>
+            <div class="action-text">
+              <h3>发布商品</h3>
+              <p>发布二手商品</p>
+            </div>
+          </router-link>
+          <router-link to="/favorites" class="action-card">
+            <div class="action-icon">❤️</div>
+            <div class="action-text">
+              <h3>我的收藏</h3>
+              <p>查看收藏商品</p>
+            </div>
+          </router-link>
         </div>
       </div>
 

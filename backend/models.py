@@ -104,10 +104,43 @@ class OrderResponse(BaseModel):
     taxPrice: float
     shippingPrice: float
     totalPrice: float
-    isPaid: bool = False
+    status: str = "pending"
     paidAt: Optional[datetime] = None
-    isDelivered: bool = False
     deliveredAt: Optional[datetime] = None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+# Review Models
+class ReviewBase(BaseModel):
+    rating: int = Field(..., ge=1, le=5)
+    comment: str
+
+class ReviewCreate(ReviewBase):
+    product_id: str
+
+class ReviewResponse(ReviewBase):
+    id: str
+    user_id: str
+    product_id: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+# Favorite Models
+class FavoriteBase(BaseModel):
+    product_id: str
+
+class FavoriteCreate(FavoriteBase):
+    pass
+
+class FavoriteResponse(BaseModel):
+    id: str
+    user_id: str
+    product_id: str
+    product: ProductResponse
     created_at: datetime
 
     class Config:

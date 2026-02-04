@@ -4,33 +4,72 @@
       <div class="container">
         <h1 class="hero-title">欢迎来到 CozShop</h1>
         <p class="hero-subtitle">发现优质商品，享受购物乐趣</p>
+        
+        <!-- Search Bar -->
+        <div class="search-bar">
+          <input 
+            type="text" 
+            v-model="searchQuery" 
+            placeholder="搜索商品..."
+            class="search-input"
+          />
+          <button @click="fetchProducts" class="search-btn">搜索</button>
+        </div>
       </div>
     </div>
     
     <div class="container">
-      <div class="filters">
-        <button 
-          v-for="category in categories" 
-          :key="category"
-          @click="selectedCategory = category"
-          :class="['filter-btn', { active: selectedCategory === category }]"
-        >
-          {{ category }}
-        </button>
+      <!-- Filters -->
+      <div class="filters-container">
+        <div class="category-filters">
+          <button 
+            v-for="category in categories" 
+            :key="category"
+            @click="selectedCategory = category; fetchProducts()"
+            :class="['filter-btn', { active: selectedCategory === category }]"
+          >
+            {{ category }}
+          </button>
+        </div>
+        
+        <!-- Price Filter -->
+        <div class="price-filter">
+          <label>价格范围:</label>
+          <div class="price-inputs">
+            <input 
+              type="number" 
+              v-model.number="minPrice" 
+              placeholder="最低"
+              min="0"
+              step="0.01"
+              class="price-input"
+            />
+            <span>-</span>
+            <input 
+              type="number" 
+              v-model.number="maxPrice" 
+              placeholder="最高"
+              min="0"
+              step="0.01"
+              class="price-input"
+            />
+            <button @click="fetchProducts" class="btn btn-sm btn-primary">筛选</button>
+          </div>
+        </div>
       </div>
       
       <div v-if="loading" class="loading">
         <div class="spinner"></div>
       </div>
       
-      <div v-else-if="filteredProducts.length === 0" class="empty-state">
+      <div v-else-if="products.length === 0" class="empty-state">
         <div class="empty-state-icon">📦</div>
         <p class="empty-state-text">暂无商品</p>
       </div>
       
       <div v-else class="products-grid">
         <div 
-          v-for="product in filteredProducts" 
+          v-for="product in products" 
           :key="product.id"
           class="product-card card"
           @click="goToProduct(product.id)"
@@ -79,17 +118,33 @@ const products = ref([])
 const loading = ref(true)
 const selectedCategory = ref('全部')
 const categories = ref(['全部', 'Electronics', 'Accessories'])
-
-const filteredProducts = computed(() => {
-  if (selectedCategory.value === '全部') {
-    return products.value
-  }
-  return products.value.filter(p => p.category === selectedCategory.value)
-})
+const searchQuery = ref('')
+const minPrice = ref(null)
+const maxPrice = ref(null)
 
 const fetchProducts = async () => {
+  loading.value = true
   try {
-    const response = await api.get('/products')
+    // Build query params
+    const params = {}
+    
+    if (searchQuery.value) {
+      params.search = searchQuery.value
+    }
+    
+    if (selectedCategory.value !== '全部') {
+      params.category = selectedCategory.value
+    }
+    
+    if (minPrice.value !== null && minPrice.value > 0) {
+      params.min_price = minPrice.value
+    }
+    
+    if (maxPrice.value !== null && maxPrice.value > 0) {
+      params.max_price = maxPrice.value
+    }
+    
+    const response = await api.get('/products', { params })
     products.value = response.data
   } catch (error) {
     console.error('Failed to fetch products:', error)
@@ -139,12 +194,50 @@ onMounted(() => {
 .hero-subtitle {
   font-size: 20px;
   opacity: 0.9;
+  margin-bottom: 32px;
 }
 
-.filters {
+/* Search Bar */
+.search-bar {
+  display: flex;
+  max-width: 600px;
+  margin: 0 auto;
+  gap: 8px;
+}
+
+.search-input {
+  flex: 1;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 25px;
+  font-size: 16px;
+  outline: none;
+}
+
+.search-btn {
+  padding: 12px 24px;
+  background: white;
+  color: #667eea;
+  border: none;
+  border-radius: 25px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.search-btn:hover {
+  background: #f0f0f0;
+}
+
+/* Filters */
+.filters-container {
+  margin-bottom: 32px;
+}
+
+.category-filters {
   display: flex;
   gap: 12px;
-  margin-bottom: 32px;
+  margin-bottom: 20px;
   flex-wrap: wrap;
 }
 
@@ -169,6 +262,43 @@ onMounted(() => {
   border-color: var(--primary-color);
   color: white;
 }
+
+/* Price Filter */
+.price-filter {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  background: var(--bg-secondary);
+  padding: 16px;
+  border-radius: 8px;
+}
+
+.price-filter label {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.price-inputs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.price-input {
+  padding: 8px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  width: 100px;
+  font-size: 14px;
+}
+
+.price-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
 
 .products-grid {
   display: grid;
