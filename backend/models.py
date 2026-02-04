@@ -61,17 +61,16 @@ class ProductResponse(ProductBase):
 # Cart Models
 class CartItem(BaseModel):
     product_id: str
+    name: str
+    price: float
     quantity: int = Field(..., gt=0)
-
-class CartItemResponse(BaseModel):
-    product: ProductResponse
-    quantity: int
+    image: Optional[str] = "https://via.placeholder.com/300x300"
 
 class CartResponse(BaseModel):
-    id: str
     user_id: str
-    items: List[CartItemResponse]
-    created_at: datetime
+    items: List[CartItem]
+    total_items: int
+    total_price: float
 
     class Config:
         from_attributes = True

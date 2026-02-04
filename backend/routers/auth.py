@@ -1,10 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordRequestForm
-from datetime import timedelta, datetime
+from datetime import datetime
 from models import UserCreate, UserResponse, Token
 from database import get_database
-from auth import get_password_hash, verify_password, create_access_token, get_current_user
-from config import settings
+from auth import get_current_user
 from bson import ObjectId
 
 router = APIRouter(prefix="/api/auth", tags=["Authentication"])
@@ -21,17 +19,16 @@ async def register(user: UserCreate):
             detail="Email already registered"
         )
     
-    # Create new user
+    # Create new user (no password hashing)
     user_dict = user.model_dump()
-    user_dict["password"] = get_password_hash(user.password)
     user_dict["role"] = "user"
     user_dict["created_at"] = datetime.utcnow()
     
     result = await db.users.insert_one(user_dict)
     created_user = await db.users.find_one({"_id": result.inserted_id})
     
-    # Create token
-    access_token = create_access_token(data={"sub": str(created_user["_id"])})
+    # Simplified: use user_id as token
+    access_token = str(created_user["_id"])
     
     return Token(
         access_token=access_token,
@@ -46,28 +43,30 @@ async def register(user: UserCreate):
     )
 
 @router.post("/login", response_model=Token)
-async def login(form_data: OAuth2PasswordRequestForm = Depends()):
+async def login(user: UserCreate):
     db = get_database()
     
-    user = await db.users.find_one({"email": form_data.username})
-    if not user or not verify_password(form_data.password, user["password"]):
+    # Simplified: no password verification
+    user_data = await db.users.find_one({"email": user.email})
+    if not user_data:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password",
+            detail="User not found",
             headers={"WWW-Authenticate": "Bearer"},
         )
     
-    access_token = create_access_token(data={"sub": str(user["_id"])})
+    # Simplified: use user_id as token
+    access_token = str(user_data["_id"])
     
     return Token(
         access_token=access_token,
         token_type="bearer",
         user=UserResponse(
-            id=str(user["_id"]),
-            name=user["name"],
-            email=user["email"],
-            role=user["role"],
-            created_at=user["created_at"]
+            id=str(user_data["_id"]),
+            name=user_data["name"],
+            email=user_data["email"],
+            role=user_data["role"],
+            created_at=user_data["created_at"]
         )
     )
 

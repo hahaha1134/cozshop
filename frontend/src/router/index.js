@@ -81,6 +81,18 @@ const routes = [
     meta: { title: '订单管理 - CozShop', requiresAuth: true }
   },
   {
+    path: '/admin/users',
+    name: 'AdminUsers',
+    component: () => import('@/views/AdminUsers.vue'),
+    meta: { title: '用户管理 - CozShop', requiresAuth: true }
+  },
+  {
+    path: '/admin/system',
+    name: 'AdminSystem',
+    component: () => import('@/views/AdminSystem.vue'),
+    meta: { title: '系统管理 - CozShop', requiresAuth: true }
+  },
+  {
     path: '/favorites',
     name: 'Favorites',
     component: () => import('@/views/Favorites.vue'),

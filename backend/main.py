@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from database import connect_to_mongo, close_mongo_connection
-from routers import auth, products, cart, orders, reviews, favorites
+from routers import auth, products, cart, orders, reviews, favorites, users, system
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -35,6 +35,8 @@ app.include_router(cart.router)
 app.include_router(orders.router)
 app.include_router(reviews.router)
 app.include_router(favorites.router)
+app.include_router(users.router)
+app.include_router(system.router)
 
 @app.get("/")
 async def root():

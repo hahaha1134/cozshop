@@ -29,15 +29,7 @@ export const useAuthStore = defineStore('auth', () => {
     loading.value = true
     error.value = null
     try {
-      const formData = new FormData()
-      formData.append('username', credentials.email)
-      formData.append('password', credentials.password)
-      
-      const response = await api.post('/auth/login', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      })
+      const response = await api.post('/auth/login', credentials)
       setAuth(response.data)
       return response.data
     } catch (err) {

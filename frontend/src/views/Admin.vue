@@ -15,6 +15,18 @@
             <div class="menu-text">订单管理</div>
           </router-link>
         </div>
+        <div class="menu-item">
+          <router-link to="/admin/users" class="menu-link">
+            <div class="menu-icon">👥</div>
+            <div class="menu-text">用户管理</div>
+          </router-link>
+        </div>
+        <div class="menu-item">
+          <router-link to="/admin/system" class="menu-link">
+            <div class="menu-icon">⚙️</div>
+            <div class="menu-text">系统管理</div>
+          </router-link>
+        </div>
       </div>
     </div>
   </div>
