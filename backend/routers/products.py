@@ -194,3 +194,56 @@ async def delete_product(product_id: str, user_id: str = Depends(get_current_use
     
     await db.products.delete_one({"_id": ObjectId(product_id)})
     return {"message": "Product deleted successfully"}
+
+@router.put("/{product_id}/status")
+async def update_product_status(product_id: str, status: str, user_id: str = Depends(get_current_admin)):
+    db = get_database()
+    
+    valid_statuses = ["pending", "approved", "rejected", "inactive"]
+    if status not in valid_statuses:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid status. Must be one of: {', '.join(valid_statuses)}"
+        )
+    
+    try:
+        result = await db.products.update_one(
+            {"_id": ObjectId(product_id)},
+            {"$set": {"status": status}}
+        )
+    except:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Product not found"
+        )
+    
+    if result.modified_count == 0:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Product not found"
+        )
+    
+    return {"message": "Product status updated successfully"}
+
+@router.put("/{product_id}/pin")
+async def update_product_pin(product_id: str, is_pinned: bool, user_id: str = Depends(get_current_admin)):
+    db = get_database()
+    
+    try:
+        result = await db.products.update_one(
+            {"_id": ObjectId(product_id)},
+            {"$set": {"is_pinned": is_pinned}}
+        )
+    except:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Product not found"
+        )
+    
+    if result.modified_count == 0:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Product not found"
+        )
+    
+    return {"message": "Product pin status updated successfully"}
