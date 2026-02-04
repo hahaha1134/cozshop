@@ -27,7 +27,7 @@
         </div>
         
         <div v-else class="products-grid">
-          <div v-for="product in products" :key="product.id" class="product-card">
+          <div v-for="product in filteredProducts" :key="product.id" class="product-card">
             <div class="product-image">
               <img :src="product.image" :alt="product.name">
             </div>
@@ -36,10 +36,21 @@
               <p class="product-price">¥{{ product.price.toFixed(2) }}</p>
               <p class="product-stock">库存: {{ product.stock }}</p>
               <p class="product-seller">卖家ID: {{ product.seller_id }}</p>
+              <p class="product-status">
+                状态: <span :class="['status-badge', `status-${product.status || 'pending'}`]">
+                  {{ getStatusText(product.status || 'pending') }}
+                </span>
+              </p>
               <div class="product-actions">
                 <router-link :to="`/product/edit/${product.id}`" class="btn btn-primary btn-sm">
                   编辑
                 </router-link>
+                <button @click="toggleProductStatus(product.id, product.status !== 'approved')" class="btn btn-warning btn-sm">
+                  {{ product.status === 'approved' ? '下架' : '通过' }}
+                </button>
+                <button @click="toggleProductPin(product.id, !product.is_pinned)" class="btn btn-secondary btn-sm">
+                  {{ product.is_pinned ? '取消置顶' : '置顶' }}
+                </button>
                 <button @click="deleteProduct(product.id)" class="btn btn-danger btn-sm">
                   删除
                 </button>
