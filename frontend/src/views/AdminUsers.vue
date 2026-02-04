@@ -7,12 +7,21 @@
       </div>
       
       <div class="users-list">
+        <div class="search-bar">
+          <input 
+            v-model="searchQuery" 
+            @input="handleSearch" 
+            placeholder="按用户名/邮箱搜索用户..."
+            class="search-input"
+          />
+        </div>
+        
         <div v-if="loading" class="loading">
           <div class="spinner"></div>
           <p>加载中...</p>
         </div>
         
-        <div v-else-if="users.length === 0" class="empty-state">
+        <div v-else-if="filteredUsers.length === 0" class="empty-state">
           <div class="empty-icon">👥</div>
           <p>暂无用户</p>
         </div>
@@ -25,12 +34,13 @@
                 <th>姓名</th>
                 <th>邮箱</th>
                 <th>角色</th>
+                <th>状态</th>
                 <th>注册时间</th>
                 <th>操作</th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="user in users" :key="user.id">
+              <tr v-for="user in filteredUsers" :key="user.id">
                 <td>{{ user.id }}</td>
                 <td>{{ user.name }}</td>
                 <td>{{ user.email }}</td>
@@ -39,6 +49,14 @@
                     <option value="user">用户</option>
                     <option value="admin">管理员</option>
                   </select>
+                </td>
+                <td>
+                  <button 
+                    @click="toggleUserStatus(user.id, user.status !== 'active')" 
+                    :class="['btn', 'btn-sm', user.status === 'active' ? 'btn-warning' : 'btn-success']"
+                  >
+                    {{ user.status === 'active' ? '禁用' : '启用' }}
+                  </button>
                 </td>
                 <td>{{ formatDate(user.created_at) }}</td>
                 <td>
@@ -65,8 +83,11 @@ const router = useRouter()
 const authStore = useAuthStore()
 
 const users = ref([])
+const filteredUsers = ref([])
+const searchQuery = ref('')
 const loading = ref(true)
 const userRoles = reactive({})
+const userStatuses = reactive({})
 
 onMounted(async () => {
   // Check if user is admin
@@ -84,15 +105,52 @@ const fetchUsers = async () => {
     const response = await api.get('/users')
     users.value = response.data
     
-    // Initialize user roles
+    // Initialize user roles and statuses
     users.value.forEach(user => {
       userRoles[user.id] = user.role
+      userStatuses[user.id] = user.status || 'active' // Default to active if status not set
     })
+    
+    // Initialize filtered users
+    filteredUsers.value = [...users.value]
   } catch (error) {
     console.error('Failed to fetch users:', error)
     alert('获取用户列表失败')
   } finally {
     loading.value = false
+  }
+}
+
+const handleSearch = () => {
+  if (!searchQuery.value) {
+    filteredUsers.value = [...users.value]
+    return
+  }
+  
+  const query = searchQuery.value.toLowerCase()
+  filteredUsers.value = users.value.filter(user => {
+    return user.name.toLowerCase().includes(query) || 
+           user.email.toLowerCase().includes(query)
+  })
+}
+
+const toggleUserStatus = async (userId, newStatus) => {
+  try {
+    await api.put(`/users/${userId}/status`, { status: newStatus ? 'active' : 'inactive' })
+    alert('用户状态更新成功')
+    
+    // Update local status
+    const user = users.value.find(u => u.id === userId)
+    if (user) {
+      user.status = newStatus ? 'active' : 'inactive'
+      userStatuses[userId] = user.status
+    }
+    
+    // Refresh filtered users
+    handleSearch()
+  } catch (error) {
+    console.error('Failed to update user status:', error)
+    alert('更新用户状态失败')
   }
 }
 
