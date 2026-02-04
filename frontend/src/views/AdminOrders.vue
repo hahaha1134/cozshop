@@ -76,6 +76,8 @@ import api from '@/utils/api'
 const authStore = useAuthStore()
 const router = useRouter()
 const orders = ref([])
+const filteredOrders = ref([])
+const searchQuery = ref('')
 const loading = ref(true)
 const orderStatuses = reactive({})
 
