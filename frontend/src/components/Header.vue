@@ -10,6 +10,7 @@
           <router-link to="/" class="nav-link">首页</router-link>
           <router-link v-if="authStore.isAuthenticated" to="/orders" class="nav-link">我的订单</router-link>
           <router-link v-if="authStore.isAuthenticated" to="/profile" class="nav-link">个人中心</router-link>
+          <router-link v-if="authStore.isAuthenticated && authStore.user?.role === 'admin'" to="/admin" class="nav-link">管理后台</router-link>
         </nav>
         
         <div class="header-actions">

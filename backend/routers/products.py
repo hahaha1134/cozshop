@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Body
 from typing import List, Optional
 from models import ProductCreate, ProductUpdate, ProductResponse
 from database import get_database
@@ -226,7 +226,7 @@ async def update_product_status(product_id: str, status: str, user_id: str = Dep
     return {"message": "Product status updated successfully"}
 
 @router.put("/{product_id}/pin")
-async def update_product_pin(product_id: str, is_pinned: bool, user_id: str = Depends(get_current_admin)):
+async def update_product_pin(product_id: str, is_pinned: bool = Body(..., description="是否置顶"), user_id: str = Depends(get_current_admin)):
     db = get_database()
     
     try:
