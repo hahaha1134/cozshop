@@ -5,7 +5,7 @@ from database import get_database
 from auth import get_current_admin, get_current_user
 from bson import ObjectId
 
-router = APIRouter(prefix="/api/users", tags=["Users"])
+router = APIRouter(prefix="/users", tags=["Users"])
 
 @router.get("", response_model=List[UserResponse])
 async def get_all_users(user_id: str = Depends(get_current_admin)):
