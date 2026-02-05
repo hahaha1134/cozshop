@@ -127,11 +127,23 @@
 </template>
 
 <script setup>
+import { ref, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
+import api from '@/utils/api'
 
 const authStore = useAuthStore()
 const router = useRouter()
+
+// Form state
+const updateForm = ref({
+  name: '',
+  phone: '',
+  address: ''
+})
+const isUpdating = ref(false)
+const message = ref('')
+const messageType = ref('')
 
 const formatDate = (dateString) => {
   if (!dateString) return '未知'
@@ -143,10 +155,54 @@ const formatDate = (dateString) => {
   })
 }
 
+const updateProfile = async () => {
+  try {
+    isUpdating.value = true
+    message.value = ''
+    
+    const response = await api.put('/users/profile/update', {
+      name: updateForm.value.name || undefined,
+      phone: updateForm.value.phone || undefined,
+      address: updateForm.value.address || undefined
+    })
+    
+    message.value = response.data.message
+    messageType.value = 'success'
+    
+    // Update auth store
+    if (response.data.user) {
+      authStore.updateUser(response.data.user)
+    }
+    
+    // Reset form
+    updateForm.value = {
+      name: '',
+      phone: '',
+      address: ''
+    }
+    
+  } catch (error) {
+    console.error('Update profile failed:', error)
+    message.value = error.response?.data?.detail || '更新失败，请重试'
+    messageType.value = 'error'
+  } finally {
+    isUpdating.value = false
+  }
+}
+
 const handleLogout = async () => {
   await authStore.logout()
   router.push('/login')
 }
+
+onMounted(() => {
+  // Initialize form with current user data
+  if (authStore.user) {
+    updateForm.value.name = authStore.user.name || ''
+    updateForm.value.phone = authStore.user.phone || ''
+    updateForm.value.address = authStore.user.address || ''
+  }
+})
 </script>
 
 <style scoped>
