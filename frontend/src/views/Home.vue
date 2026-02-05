@@ -197,9 +197,31 @@ const addToCart = async (product) => {
   }
 }
 
-onMounted(() => {
-  fetchProducts()
+onMounted(async () => {
+  await fetchProducts()
+  await fetchAnnouncements()
 })
+
+const fetchAnnouncements = async () => {
+  try {
+    const response = await api.get('/system/announcements/public')
+    announcements.value = response.data
+  } catch (error) {
+    console.error('Failed to fetch announcements:', error)
+    // 静默失败，因为公告不是必须的
+  }
+}
+
+const formatDate = (dateString) => {
+  const date = new Date(dateString)
+  return date.toLocaleString('zh-CN', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+}
 </script>
 
 <style scoped>
@@ -213,6 +235,58 @@ onMounted(() => {
   padding: 60px 0;
   text-align: center;
   margin-bottom: 40px;
+}
+
+.announcements-section {
+  background: #f9f9f9;
+  padding: 40px 0;
+  margin-bottom: 40px;
+}
+
+.section-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 24px;
+  color: var(--text-primary);
+  text-align: center;
+}
+
+.announcements-list {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.announcement-item {
+  background: white;
+  padding: 24px;
+  margin-bottom: 16px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.announcement-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--text-primary);
+}
+
+.announcement-content {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+  line-height: 1.5;
+}
+
+.announcement-date {
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+.empty-announcements {
+  text-align: center;
+  padding: 40px 0;
+  color: var(--text-secondary);
 }
 
 .hero-title {
