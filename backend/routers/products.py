@@ -9,19 +9,35 @@ from datetime import datetime
 router = APIRouter(prefix="/api/products", tags=["Products"])
 
 @router.get("", response_model=List[ProductResponse])
-async def get_products(search: Optional[str] = None, category: Optional[str] = None, min_price: Optional[float] = None, max_price: Optional[float] = None):
+async def get_products(search: Optional[str] = None, category: Optional[str] = None, min_price: Optional[float] = None, max_price: Optional[float] = None, user_id: Optional[str] = Depends(get_current_user)):
     db = get_database()
     
     print("=== Product API Call Received ===")
     print(f"Params: search={search}, category={category}, min_price={min_price}, max_price={max_price}")
     
+    # Check if user is admin
+    is_admin = False
+    if user_id:
+        try:
+            user = await db.users.find_one({"_id": ObjectId(user_id)})
+            if user and user.get("role") == "admin":
+                is_admin = True
+                print("User is admin, returning all products")
+        except:
+            pass
+    
     # Build query
-    query = {
-        "$or": [
-            {"status": "approved"},
-            {"status": {"$exists": False}}
-        ]
-    }
+    if is_admin:
+        # Admin can see all products
+        query = {}
+    else:
+        # Regular users can only see approved products
+        query = {
+            "$or": [
+                {"status": "approved"},
+                {"status": {"$exists": False}}
+            ]
+        }
     
     if search:
         query["$and"] = query.get("$and", []) + [
