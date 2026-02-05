@@ -262,9 +262,9 @@ async def delete_product(product_id: str, user_id: str = Depends(get_current_use
 async def update_product_status(product_id: str, status_data: dict = Body(..., description="状态数据"), user_id: str = Depends(get_current_admin)):
     db = get_database()
     
-    status = status_data.get("status")
+    new_status = status_data.get("status")
     valid_statuses = ["pending", "approved", "rejected", "inactive"]
-    if status not in valid_statuses:
+    if new_status not in valid_statuses:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Invalid status. Must be one of: {', '.join(valid_statuses)}"
@@ -273,7 +273,7 @@ async def update_product_status(product_id: str, status_data: dict = Body(..., d
     try:
         result = await db.products.update_one(
             {"_id": ObjectId(product_id)},
-            {"$set": {"status": status}}
+            {"$set": {"status": new_status}}
         )
     except:
         raise HTTPException(
