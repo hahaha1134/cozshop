@@ -50,6 +50,10 @@ async def root():
 async def health_check():
     return {"status": "healthy"}
 
+@app.get("/api/test")
+async def test_route():
+    return {"message": "Test route works!"}
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=5000)
