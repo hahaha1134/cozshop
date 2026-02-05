@@ -26,12 +26,12 @@ async def get_orders(user_id: str = Depends(get_current_user)):
                     quantity=item["quantity"],
                     image=item.get("image", "https://via.placeholder.com/300x300")
                 )
-                for item in order["orderItems"]
+                for item in order.get("items", [])
             ],
-            totalPrice=order["totalPrice"],
+            totalPrice=order.get("total_price", 0),
             status=order["status"],
-            shippingAddress=order["shippingAddress"],
-            paymentMethod=order["paymentMethod"],
+            shippingAddress=order.get("shipping_address", {}),
+            paymentMethod=order.get("payment_method", ""),
             created_at=order["created_at"]
         )
         for order in orders
@@ -55,12 +55,12 @@ async def get_all_orders(user_id: str = Depends(get_current_admin)):
                     quantity=item["quantity"],
                     image=item.get("image", "https://via.placeholder.com/300x300")
                 )
-                for item in order["orderItems"]
+                for item in order.get("items", [])
             ],
-            totalPrice=order["totalPrice"],
+            totalPrice=order.get("total_price", 0),
             status=order["status"],
-            shippingAddress=order["shippingAddress"],
-            paymentMethod=order["paymentMethod"],
+            shippingAddress=order.get("shipping_address", {}),
+            paymentMethod=order.get("payment_method", ""),
             created_at=order["created_at"]
         )
         for order in orders
@@ -102,12 +102,12 @@ async def get_order(order_id: str, user_id: str = Depends(get_current_user)):
                 quantity=item["quantity"],
                 image=item.get("image", "https://via.placeholder.com/300x300")
             )
-            for item in order["orderItems"]
+            for item in order.get("items", [])
         ],
-        totalPrice=order["totalPrice"],
+        totalPrice=order.get("total_price", 0),
         status=order["status"],
-        shippingAddress=order["shippingAddress"],
-        paymentMethod=order["paymentMethod"],
+        shippingAddress=order.get("shipping_address", {}),
+        paymentMethod=order.get("payment_method", ""),
         created_at=order["created_at"]
     )
 
