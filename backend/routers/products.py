@@ -137,7 +137,9 @@ async def get_product(product_id: str):
         image=product.get("image", "https://via.placeholder.com/300x300"),
         rating=product.get("rating", 0),
         numReviews=product.get("numReviews", 0),
-        created_at=product["created_at"]
+        created_at=product["created_at"],
+        status=product.get("status", "pending"),
+        seller_id=product.get("seller_id")
     )
 
 @router.post("", response_model=ProductResponse, status_code=status.HTTP_201_CREATED)
