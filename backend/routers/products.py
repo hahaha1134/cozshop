@@ -145,6 +145,82 @@ async def create_product(product: ProductCreate, user_id: str = Depends(get_curr
         created_at=created_product["created_at"]
     )
 
+@router.put("/{product_id}/status")
+async def update_product_status(product_id: str, status_data: dict = Body(..., description="状态数据"), user_id: str = Depends(get_current_admin)):
+    db = get_database()
+    
+    new_status = status_data.get("status")
+    valid_statuses = ["pending", "approved", "rejected", "inactive"]
+    if new_status not in valid_statuses:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid status. Must be one of: {', '.join(valid_statuses)}"
+        )
+    
+    try:
+        result = await db.products.update_one(
+            {"_id": ObjectId(product_id)},
+            {"$set": {"status": new_status}}
+        )
+    except:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Product not found"
+        )
+    
+    if result.modified_count == 0:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Product not found"
+        )
+    
+    return {"message": "Product status updated successfully"}
+
+@router.put("/{product_id}/pin")
+async def update_product_pin(product_id: str, pin_data: dict = Body(..., description="置顶数据"), user_id: str = Depends(get_current_admin)):
+    db = get_database()
+    
+    is_pinned = pin_data.get("is_pinned", False)
+    
+    try:
+        # Try to convert product_id to ObjectId
+        product_object_id = ObjectId(product_id)
+        print(f"Product ID: {product_id}")
+        print(f"ObjectId: {product_object_id}")
+        
+        # First check if product exists
+        product = await db.products.find_one({"_id": product_object_id})
+        print(f"Product found: {product}")
+        
+        if not product:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Product not found"
+            )
+        
+        # Update product pin status
+        result = await db.products.update_one(
+            {"_id": product_object_id},
+            {"$set": {"is_pinned": is_pinned}}
+        )
+        
+        print(f"Update result: {result}")
+        
+        # Check if product exists (matched_count > 0 if product was found)
+        if result.matched_count == 0:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Product not found"
+            )
+        
+        return {"message": "Product pin status updated successfully"}
+    except Exception as e:
+        print(f"Error: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Error: {str(e)}"
+        )
+
 @router.put("/{product_id}", response_model=ProductResponse)
 async def update_product(product_id: str, product_update: ProductUpdate, user_id: str = Depends(get_current_user)):
     db = get_database()
@@ -256,80 +332,4 @@ async def delete_product(product_id: str, user_id: str = Depends(get_current_use
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error deleting product: {str(e)}"
-        )
-
-@router.put("/{product_id}/status")
-async def update_product_status(product_id: str, status_data: dict = Body(..., description="状态数据"), user_id: str = Depends(get_current_admin)):
-    db = get_database()
-    
-    new_status = status_data.get("status")
-    valid_statuses = ["pending", "approved", "rejected", "inactive"]
-    if new_status not in valid_statuses:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Invalid status. Must be one of: {', '.join(valid_statuses)}"
-        )
-    
-    try:
-        result = await db.products.update_one(
-            {"_id": ObjectId(product_id)},
-            {"$set": {"status": new_status}}
-        )
-    except:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Product not found"
-        )
-    
-    if result.modified_count == 0:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Product not found"
-        )
-    
-    return {"message": "Product status updated successfully"}
-
-@router.put("/{product_id}/pin")
-async def update_product_pin(product_id: str, pin_data: dict = Body(..., description="置顶数据"), user_id: str = Depends(get_current_admin)):
-    db = get_database()
-    
-    is_pinned = pin_data.get("is_pinned", False)
-    
-    try:
-        # Try to convert product_id to ObjectId
-        product_object_id = ObjectId(product_id)
-        print(f"Product ID: {product_id}")
-        print(f"ObjectId: {product_object_id}")
-        
-        # First check if product exists
-        product = await db.products.find_one({"_id": product_object_id})
-        print(f"Product found: {product}")
-        
-        if not product:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Product not found"
-            )
-        
-        # Update product pin status
-        result = await db.products.update_one(
-            {"_id": product_object_id},
-            {"$set": {"is_pinned": is_pinned}}
-        )
-        
-        print(f"Update result: {result}")
-        
-        # Check if product exists (matched_count > 0 if product was found)
-        if result.matched_count == 0:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Product not found"
-            )
-        
-        return {"message": "Product pin status updated successfully"}
-    except Exception as e:
-        print(f"Error: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Error: {str(e)}"
         )
