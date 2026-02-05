@@ -13,7 +13,12 @@
     <div v-else class="container">
       <div class="product-content">
         <div class="product-image-section">
-          <img :src="product.image" :alt="product.name" class="product-image" />
+          <img 
+            :src="product.image || 'https://via.placeholder.com/500x400?text=No+Image'" 
+            :alt="product.name" 
+            class="product-image"
+            @error="$event.target.src = 'https://via.placeholder.com/500x400?text=No+Image'"
+          />
         </div>
         
         <div class="product-details">
