@@ -15,29 +15,15 @@ async def get_products(search: Optional[str] = None, category: Optional[str] = N
     print("=== Product API Call Received ===")
     print(f"Params: search={search}, category={category}, min_price={min_price}, max_price={max_price}")
     
-    # Check if user is admin
-    is_admin = False
-    if user_id:
-        try:
-            user = await db.users.find_one({"_id": ObjectId(user_id)})
-            if user and user.get("role") == "admin":
-                is_admin = True
-                print("User is admin, returning all products")
-        except:
-            pass
-    
-    # Build query
-    if is_admin:
-        # Admin can see all products
-        query = {}
-    else:
-        # Regular users can only see approved products
-        query = {
-            "$or": [
-                {"status": "approved"},
-                {"status": {"$exists": False}}
-            ]
-        }
+    # For public/homepage, always only show approved products
+    # This ensures that inactive products are not visible on homepage
+    # regardless of whether the user is admin or not
+    query = {
+        "$or": [
+            {"status": "approved"},
+            {"status": {"$exists": False}}
+        ]
+    }
     
     if search:
         query["$and"] = query.get("$and", []) + [
