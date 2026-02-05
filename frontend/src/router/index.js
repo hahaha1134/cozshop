@@ -21,6 +21,12 @@ const routes = [
     meta: { title: '购物车 - CozShop', requiresAuth: true }
   },
   {
+    path: '/checkout',
+    name: 'Checkout',
+    component: () => import('@/views/Checkout.vue'),
+    meta: { title: '结算 - CozShop', requiresAuth: true }
+  },
+  {
     path: '/orders',
     name: 'Orders',
     component: () => import('@/views/Orders.vue'),
