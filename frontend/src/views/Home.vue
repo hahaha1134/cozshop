@@ -450,8 +450,14 @@ const formatDate = (dateString) => {
   color: var(--text-secondary);
   margin: 0;
   display: -webkit-box;
+  display: -moz-box;
+  display: box;
   -webkit-line-clamp: 2;
+  -moz-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
+  -moz-box-orient: vertical;
+  box-orient: vertical;
   overflow: hidden;
   flex: 1;
 }
