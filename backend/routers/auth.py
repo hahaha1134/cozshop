@@ -22,6 +22,7 @@ async def register(user: UserCreate):
     # Create new user (no password hashing)
     user_dict = user.model_dump()
     user_dict["role"] = "user"
+    user_dict["status"] = "active"
     user_dict["created_at"] = datetime.utcnow()
     
     result = await db.users.insert_one(user_dict)
@@ -40,6 +41,7 @@ async def register(user: UserCreate):
             phone=created_user.get("phone", ""),
             address=created_user.get("address", ""),
             role=created_user["role"],
+            status=created_user.get("status", "active"),
             created_at=created_user["created_at"]
         )
     )
@@ -78,6 +80,7 @@ async def login(user: UserLogin):
             phone=user_data.get("phone", ""),
             address=user_data.get("address", ""),
             role=user_data["role"],
+            status=user_data.get("status", "active"),
             created_at=user_data["created_at"]
         )
     )
@@ -98,5 +101,6 @@ async def get_profile(user_id: str = Depends(get_current_user)):
         phone=user.get("phone", ""),
         address=user.get("address", ""),
         role=user["role"],
+        status=user.get("status", "active"),
         created_at=user["created_at"]
     )

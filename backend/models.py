@@ -22,6 +22,7 @@ class UserLogin(BaseModel):
 class UserResponse(UserBase):
     id: str
     role: str = "user"
+    status: Optional[str] = "active"
     created_at: datetime
 
     class Config:

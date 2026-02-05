@@ -18,6 +18,7 @@ async def get_all_users(user_id: str = Depends(get_current_admin)):
             name=user["name"],
             email=user["email"],
             role=user.get("role", "user"),
+            status=user.get("status", "active"),
             created_at=user["created_at"]
         )
         for user in users
@@ -45,6 +46,7 @@ async def get_user(user_id: str, admin_id: str = Depends(get_current_admin)):
         name=user["name"],
         email=user["email"],
         role=user.get("role", "user"),
+        status=user.get("status", "active"),
         created_at=user["created_at"]
     )
 
