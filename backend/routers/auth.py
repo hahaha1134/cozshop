@@ -57,6 +57,14 @@ async def login(user: UserLogin):
             headers={"WWW-Authenticate": "Bearer"},
         )
     
+    # Check if user is active
+    if user_data.get("status") == "inactive":
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Account has been disabled",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
     # Simplified: use user_id as token
     access_token = str(user_data["_id"])
     
