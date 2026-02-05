@@ -96,7 +96,7 @@ async def get_system_statistics(admin_id: str = Depends(get_current_admin)):
         product = await db.products.find_one({"_id": product_id})
         if product:
             top_products.append({
-                "id": product_id,
+                "id": str(product_id),
                 "name": product.get("name"),
                 "category": product.get("category"),
                 "quantity_sold": sales["quantity"],

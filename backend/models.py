@@ -79,15 +79,15 @@ class CartResponse(BaseModel):
 
 # Order Models
 class ShippingAddress(BaseModel):
-    address: str
-    city: str
-    postalCode: str
-    country: str
+    address: Optional[str] = ""
+    city: Optional[str] = ""
+    postalCode: Optional[str] = ""
+    country: Optional[str] = ""
 
 class OrderItem(BaseModel):
     name: str
     quantity: int
-    image: str
+    image: Optional[str] = "https://via.placeholder.com/300x300"
     price: float
     product_id: str
 
@@ -99,11 +99,11 @@ class OrderResponse(BaseModel):
     id: str
     user_id: str
     orderItems: List[OrderItem]
-    shippingAddress: ShippingAddress
-    paymentMethod: str
-    itemsPrice: float
-    taxPrice: float
-    shippingPrice: float
+    shippingAddress: Optional[ShippingAddress] = ShippingAddress()
+    paymentMethod: Optional[str] = ""
+    itemsPrice: Optional[float] = 0
+    taxPrice: Optional[float] = 0
+    shippingPrice: Optional[float] = 0
     totalPrice: float
     status: str = "pending"
     paidAt: Optional[datetime] = None
