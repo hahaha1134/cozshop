@@ -17,10 +17,10 @@ async def get_orders(user_id: str = Depends(get_current_user)):
     return [
         OrderResponse(
             id=str(order["_id"]),
-            user_id=order["user_id"],
+            user_id=str(order["user_id"]),
             orderItems=[
                 OrderItem(
-                    product_id=item["product_id"],
+                    product_id=str(item["product_id"]),
                     name=item["name"],
                     price=item["price"],
                     quantity=item["quantity"],
