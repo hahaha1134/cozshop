@@ -18,4 +18,18 @@ async def check_orders():
             print(f'  ID: {order.get("_id")}')
             print(f'  Status: {order.get("status")}')
             print(f'  Total price: {order.get("total_price")}')
-            print(f'  Created at: {
+            print(f'  Created at: {order.get("created_at")}')
+            print(f'  Items: {len(order.get("items", []))} items')
+            print()
+    else:
+        print('\nNo orders found in database')
+    
+    # Check products
+    products_count = await db.products.count_documents({})
+    print(f'Total products: {products_count}')
+    
+    # Close connection
+    await db.client.close()
+
+if __name__ == '__main__':
+    asyncio.run(check_orders())
