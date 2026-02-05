@@ -185,6 +185,8 @@ async def update_profile(
             id=str(updated_user["_id"]),
             name=updated_user["name"],
             email=updated_user["email"],
+            phone=updated_user.get("phone", None),
+            address=updated_user.get("address", None),
             role=updated_user.get("role", "user"),
             created_at=updated_user["created_at"]
         )

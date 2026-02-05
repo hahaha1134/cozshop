@@ -6,6 +6,8 @@ from datetime import datetime
 class UserBase(BaseModel):
     name: str
     email: EmailStr
+    phone: Optional[str] = None
+    address: Optional[str] = None
 
 class UserCreate(UserBase):
     password: str = Field(..., min_length=6)
