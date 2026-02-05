@@ -159,6 +159,13 @@ const handleSearch = () => {
 }
 
 const toggleUserStatus = async (userId, newStatus) => {
+  // Check if user is trying to disable their own account
+  if (userId === authStore.user.id && !newStatus) {
+    if (!confirm('警告：您正在尝试禁用自己的账号，这会导致您立即被登出，并且无法重新登录，需要其他管理员来重新激活您的账号。确定要继续吗？')) {
+      return
+    }
+  }
+  
   try {
     await api.put(`/users/${userId}/status`, { status: newStatus ? 'active' : 'inactive' })
     alert('用户状态更新成功')
@@ -168,6 +175,12 @@ const toggleUserStatus = async (userId, newStatus) => {
     if (user) {
       user.status = newStatus ? 'active' : 'inactive'
       userStatuses[userId] = user.status
+    }
+    
+    // If user disabled their own account, log them out
+    if (userId === authStore.user.id && !newStatus) {
+      authStore.logout()
+      router.push('/login')
     }
     
     // Refresh filtered users
