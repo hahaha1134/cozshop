@@ -18,6 +18,23 @@
       </div>
     </div>
     
+    <!-- Announcements -->
+    <div class="announcements-section">
+      <div class="container">
+        <h2 class="section-title">系统公告</h2>
+        <div v-if="announcements.length > 0" class="announcements-list">
+          <div v-for="announcement in announcements" :key="announcement.id" class="announcement-item">
+            <h3 class="announcement-title">{{ announcement.title }}</h3>
+            <p class="announcement-content">{{ announcement.content }}</p>
+            <span class="announcement-date">{{ formatDate(announcement.created_at) }}</span>
+          </div>
+        </div>
+        <div v-else class="empty-announcements">
+          <p>暂无系统公告</p>
+        </div>
+      </div>
+    </div>
+    
     <div class="container">
       <!-- Filters -->
       <div class="filters-container">
@@ -125,6 +142,7 @@ const categories = ref(['全部', 'Electronics', 'Accessories'])
 const searchQuery = ref('')
 const minPrice = ref(null)
 const maxPrice = ref(null)
+const announcements = ref([])
 
 const fetchProducts = async () => {
   loading.value = true

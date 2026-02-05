@@ -160,6 +160,24 @@ async def get_announcements(admin_id: str = Depends(get_current_admin)):
     
     return result
 
+@router.get("/announcements/public")
+async def get_public_announcements():
+    db = get_database()
+    # Get latest 5 announcements for public display
+    announcements = await db.announcements.find().sort("created_at", -1).limit(5).to_list(length=5)
+    
+    # Convert to response format
+    result = []
+    for announcement in announcements:
+        result.append({
+            "id": str(announcement["_id"]),
+            "title": announcement["title"],
+            "content": announcement["content"],
+            "created_at": announcement["created_at"]
+        })
+    
+    return result
+
 @router.post("/announcements")
 async def create_announcement(title: str = Body(..., description="公告标题"), content: str = Body(..., description="公告内容"), admin_id: str = Depends(get_current_admin)):
     db = get_database()

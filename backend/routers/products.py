@@ -13,25 +13,35 @@ async def get_products(search: Optional[str] = None, category: Optional[str] = N
     db = get_database()
     
     # Build query
-    query = {}
+    query = {
+        "$or": [
+            {"status": "active"},
+            {"status": {"$exists": False}}
+        ]
+    }
     
     if search:
-        query["$or"] = [
-            {"name": {"$regex": search, "$options": "i"}},
-            {"description": {"$regex": search, "$options": "i"}}
+        query["$and"] = query.get("$and", []) + [
+            {"$or": [
+                {"name": {"$regex": search, "$options": "i"}},
+                {"description": {"$regex": search, "$options": "i"}}
+            ]}
         ]
     
     if category:
-        query["category"] = category
+        query["$and"] = query.get("$and", []) + [
+            {"category": category}
+        ]
     
     if min_price is not None:
-        query["price"] = {"$gte": min_price}
+        query["$and"] = query.get("$and", []) + [
+            {"price": {"$gte": min_price}}
+        ]
     
     if max_price is not None:
-        if "price" in query:
-            query["price"]["$lte"] = max_price
-        else:
-            query["price"] = {"$lte": max_price}
+        query["$and"] = query.get("$and", []) + [
+            {"price": {"$lte": max_price}}
+        ]
     
     products = await db.products.find(query).to_list(length=100)
     return [
