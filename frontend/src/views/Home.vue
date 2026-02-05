@@ -75,7 +75,11 @@
           @click="goToProduct(product.id)"
         >
           <div class="product-image">
-            <img :src="product.image" :alt="product.name" />
+            <img 
+              :src="product.image || 'https://via.placeholder.com/300x200?text=No+Image'" 
+              :alt="product.name"
+              @error="$event.target.src = 'https://via.placeholder.com/300x200?text=No+Image'"
+            />
           </div>
           <div class="product-info">
             <h3 class="product-name">{{ product.name }}</h3>

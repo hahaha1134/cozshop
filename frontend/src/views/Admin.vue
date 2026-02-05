@@ -162,7 +162,7 @@ const orderStatuses = ref({})
 const fetchData = async () => {
   try {
     // Fetch system status
-    const statusResponse = await api.get('/system/status')
+    const statusResponse = await api.get('/api/system/status')
     const statusData = statusResponse.data
     stats.value = {
       total_products: statusData.statistics.total_products,
@@ -173,12 +173,12 @@ const fetchData = async () => {
     orderStatuses.value = statusData.statistics.order_statuses
     
     // Fetch today's stats
-    const todayResponse = await api.get('/system/today')
+    const todayResponse = await api.get('/api/system/today')
     todayStats.value = todayResponse.data.today
     
     // Fetch sales data
-    const statsResponse = await api.get('/system/stats')
-    salesData.value = statsResponse.data.monthly_sales
+    const statsResponse = await api.get('/api/system/stats')
+    salesData.value = statsResponse.data
     
   } catch (error) {
     console.error('Failed to fetch dashboard data:', error)
@@ -277,11 +277,11 @@ const initCharts = () => {
           type: 'pie',
           radius: '50%',
           data: [
-            { value: orderStatuses.value.pending, name: '待处理' },
-            { value: orderStatuses.value.processing, name: '处理中' },
-            { value: orderStatuses.value.shipped, name: '已发货' },
-            { value: orderStatuses.value.delivered, name: '已送达' },
-            { value: orderStatuses.value.cancelled, name: '已取消' }
+            { value: orderStatuses.value.pending || 0, name: '待处理' },
+            { value: orderStatuses.value.processing || 0, name: '处理中' },
+            { value: orderStatuses.value.shipped || 0, name: '已发货' },
+            { value: orderStatuses.value.delivered || 0, name: '已送达' },
+            { value: orderStatuses.value.cancelled || 0, name: '已取消' }
           ],
           emphasis: {
             itemStyle: {
