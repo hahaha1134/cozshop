@@ -139,23 +139,23 @@
           <div class="status-grid">
             <div class="status-item">
               <div class="status-label">待处理</div>
-              <div class="status-value">{{ systemStats.statistics.order_statuses.pending }}</div>
+              <div class="status-value">{{ systemStats.statistics?.order_statuses?.pending || 0 }}</div>
             </div>
             <div class="status-item">
               <div class="status-label">处理中</div>
-              <div class="status-value">{{ systemStats.statistics.order_statuses.processing }}</div>
+              <div class="status-value">{{ systemStats.statistics?.order_statuses?.processing || 0 }}</div>
             </div>
             <div class="status-item">
               <div class="status-label">已发货</div>
-              <div class="status-value">{{ systemStats.statistics.order_statuses.shipped }}</div>
+              <div class="status-value">{{ systemStats.statistics?.order_statuses?.shipped || 0 }}</div>
             </div>
             <div class="status-item">
               <div class="status-label">已送达</div>
-              <div class="status-value">{{ systemStats.statistics.order_statuses.delivered }}</div>
+              <div class="status-value">{{ systemStats.statistics?.order_statuses?.delivered || 0 }}</div>
             </div>
             <div class="status-item">
               <div class="status-label">已取消</div>
-              <div class="status-value">{{ systemStats.statistics.order_statuses.cancelled }}</div>
+              <div class="status-value">{{ systemStats.statistics?.order_statuses?.cancelled || 0 }}</div>
             </div>
           </div>
         </div>
