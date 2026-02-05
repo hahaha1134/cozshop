@@ -1,8 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from typing import List
+from fastapi import APIRouter, Depends, HTTPException, status, Body
+from typing import List, Optional
 from models import UserResponse
 from database import get_database
-from auth import get_current_admin
+from auth import get_current_admin, get_current_user
 from bson import ObjectId
 
 router = APIRouter(prefix="/api/users", tags=["Users"])
