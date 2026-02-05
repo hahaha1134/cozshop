@@ -14,4 +14,7 @@ print(f'更新结果: {result.modified_count} 个文档被更新')
 
 # 验证更新结果
 user = db.users.find_one({"email": "admin@cozshop.com"})
-print(f'管理员用户现在的状态: {user.get("status
+print(f'管理员用户现在的状态: {user.get("status")}')
+
+# 关闭连接
+client.close()
