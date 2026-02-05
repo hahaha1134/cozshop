@@ -35,7 +35,12 @@
               :key="item.product_id"
               class="order-item"
             >
-              <img :src="item.image" :alt="item.name" class="item-image" />
+              <img 
+                :src="item.image || 'https://via.placeholder.com/100x100?text=No+Image'" 
+                :alt="item.name" 
+                class="item-image"
+                @error="$event.target.src = 'https://via.placeholder.com/100x100?text=No+Image'"
+              />
               <div class="item-details">
                 <h4 class="item-name">{{ item.name }}</h4>
                 <p class="item-price">¥{{ item.price.toFixed(2) }} × {{ item.quantity }}</p>
