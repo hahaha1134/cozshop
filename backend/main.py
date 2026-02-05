@@ -16,8 +16,7 @@ app = FastAPI(
     title="CozShop API",
     description="A modern e-commerce API built with FastAPI and MongoDB",
     version="1.0.0",
-    lifespan=lifespan,
-    openapi_prefix="/api"
+    lifespan=lifespan
 )
 
 # CORS middleware
