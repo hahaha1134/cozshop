@@ -169,6 +169,7 @@ async def update_product_status(product_id: str, status_data: dict = Body(..., d
             {"$set": {"status": new_status}}
         )
         print(f"Update result: {result}")
+        print(f"Matched count: {result.matched_count}")
         print(f"Modified count: {result.modified_count}")
     except Exception as e:
         print(f"Error updating product status: {e}")
@@ -177,12 +178,17 @@ async def update_product_status(product_id: str, status_data: dict = Body(..., d
             detail="Product not found"
         )
     
-    if result.modified_count == 0:
-        print(f"No product modified: {product_id}")
+    if result.matched_count == 0:
+        print(f"No product found: {product_id}")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Product not found"
         )
+    
+    # If no modification but product exists, still return success
+    if result.modified_count == 0:
+        print(f"Product status already up to date: {product_id}")
+        return {"message": "Product status already up to date"}
     
     print(f"Product status updated successfully: {product_id}")
     return {"message": "Product status updated successfully"}
