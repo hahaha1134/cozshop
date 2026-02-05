@@ -69,7 +69,9 @@ async def update_user_role(user_id: str, role: str, admin_id: str = Depends(get_
             detail="User not found"
         )
     
-    if result.modified_count == 0:
+    # Check if user exists (even if no changes were made)
+    user_exists = await db.users.find_one({"_id": ObjectId(user_id)})
+    if not user_exists:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User not found"
@@ -118,7 +120,9 @@ async def update_user_status(user_id: str, status: str, admin_id: str = Depends(
             detail="User not found"
         )
     
-    if result.modified_count == 0:
+    # Check if user exists (even if no changes were made)
+    user_exists = await db.users.find_one({"_id": ObjectId(user_id)})
+    if not user_exists:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User not found"
@@ -164,7 +168,9 @@ async def update_profile(
             )
         raise
     
-    if result.modified_count == 0:
+    # Check if user exists (even if no changes were made)
+    user_exists = await db.users.find_one({"_id": ObjectId(user_id)})
+    if not user_exists:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User not found"
