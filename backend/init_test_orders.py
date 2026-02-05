@@ -56,4 +56,21 @@ async def init_test_orders():
                 'status': status,
                 'shipping_address': {
                     'name': 'Test User',
-                    'phone': '
+                    'phone': '13800138000',
+                    'address': 'Test Address'
+                },
+                'payment_method': 'credit_card',
+                'created_at': order_date
+            }
+            
+            test_orders.append(order)
+    
+    # Insert orders
+    if test_orders:
+        result = await db.orders.insert_many(test_orders)
+        print(f'成功创建 {len(result.inserted_ids)} 个测试订单')
+    else:
+        print('没有创建测试订单')
+
+if __name__ == '__main__':
+    asyncio.run(init_test_orders())
