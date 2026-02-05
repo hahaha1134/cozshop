@@ -49,7 +49,8 @@ async def get_products(search: Optional[str] = None, category: Optional[str] = N
     
     print(f"Query: {query}")
     
-    products = await db.products.find(query).to_list(length=100)
+    # Sort products: pinned products first, then by creation time (newest first)
+    products = await db.products.find(query).sort([("is_pinned", -1), ("created_at", -1)]).to_list(length=100)
     print(f"Found {len(products)} products")
     
     if products:
