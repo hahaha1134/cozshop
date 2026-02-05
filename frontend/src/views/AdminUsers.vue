@@ -90,10 +90,34 @@ const userRoles = reactive({})
 const userStatuses = reactive({})
 
 onMounted(async () => {
+  // Check if user is logged in
+  if (!authStore.token) {
+    alert('请先登录')
+    router.push('/login')
+    return
+  }
+  
+  // Fetch user profile to ensure login status is valid
+  try {
+    await authStore.fetchProfile()
+  } catch (error) {
+    console.error('Failed to fetch user profile:', error)
+    alert('登录状态已过期，请重新登录')
+    router.push('/login')
+    return
+  }
+  
   // Check if user is admin
   if (!authStore.user || authStore.user.role !== 'admin') {
     alert('您没有权限访问管理后台')
     router.push('/')
+    return
+  }
+  
+  // Check if user account is active
+  if (authStore.user.status === 'inactive') {
+    alert('您的账号已被禁用，请联系管理员')
+    router.push('/login')
     return
   }
   
