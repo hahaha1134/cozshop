@@ -118,6 +118,12 @@
               <div class="menu-text">系统管理</div>
             </router-link>
           </div>
+          <div class="menu-item">
+            <router-link to="/admin/announcements" class="menu-link">
+              <div class="menu-icon">📢</div>
+              <div class="menu-text">公告管理</div>
+            </router-link>
+          </div>
         </div>
       </div>
     </div>

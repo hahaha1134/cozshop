@@ -99,6 +99,12 @@ const routes = [
     meta: { title: '系统管理 - CozShop', requiresAuth: true }
   },
   {
+    path: '/admin/announcements',
+    name: 'AdminAnnouncements',
+    component: () => import('@/views/AdminAnnouncements.vue'),
+    meta: { title: '公告管理 - CozShop', requiresAuth: true }
+  },
+  {
     path: '/favorites',
     name: 'Favorites',
     component: () => import('@/views/Favorites.vue'),
