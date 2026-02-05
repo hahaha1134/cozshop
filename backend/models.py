@@ -56,6 +56,8 @@ class ProductResponse(ProductBase):
     rating: float = 0
     numReviews: int = 0
     created_at: datetime
+    status: Optional[str] = "pending"
+    seller_id: Optional[str] = None
 
     class Config:
         from_attributes = True

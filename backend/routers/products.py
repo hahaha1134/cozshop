@@ -81,7 +81,9 @@ async def get_products(search: Optional[str] = None, category: Optional[str] = N
             image=product.get("image", "https://via.placeholder.com/300x300"),
             rating=product.get("rating", 0),
             numReviews=product.get("numReviews", 0),
-            created_at=product["created_at"]
+            created_at=product["created_at"],
+            status=product.get("status", "pending"),
+            seller_id=product.get("seller_id")
         )
         for product in products
     ]
@@ -101,7 +103,9 @@ async def get_my_products(user_id: str = Depends(get_current_user)):
             image=product.get("image", "https://via.placeholder.com/300x300"),
             rating=product.get("rating", 0),
             numReviews=product.get("numReviews", 0),
-            created_at=product["created_at"]
+            created_at=product["created_at"],
+            status=product.get("status", "pending"),
+            seller_id=product.get("seller_id")
         )
         for product in products
     ]
