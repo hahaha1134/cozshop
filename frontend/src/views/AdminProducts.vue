@@ -93,7 +93,7 @@ onMounted(async () => {
 
 const fetchProducts = async () => {
   try {
-    const response = await api.get('/products')
+    const response = await api.get('/api/products')
     products.value = response.data
     filteredProducts.value = [...products.value]
   } catch (error) {
@@ -129,7 +129,7 @@ const getStatusText = (status) => {
 const toggleProductStatus = async (productId, newStatus) => {
   try {
     const status = newStatus ? 'approved' : 'inactive'
-    await api.put(`/products/${productId}/status`, { status })
+    await api.put(`/api/products/${productId}/status`, { status })
     alert('商品状态更新成功')
     
     // Update local status
@@ -148,7 +148,7 @@ const toggleProductStatus = async (productId, newStatus) => {
 
 const toggleProductPin = async (productId, newPinStatus) => {
   try {
-    await api.put(`/products/${productId}/pin`, { is_pinned: newPinStatus })
+    await api.put(`/api/products/${productId}/pin`, { is_pinned: newPinStatus })
     alert('商品置顶状态更新成功')
     
     // Update local pin status
@@ -168,7 +168,7 @@ const toggleProductPin = async (productId, newPinStatus) => {
 const deleteProduct = async (productId) => {
   if (confirm('确定要删除此商品吗？')) {
     try {
-      await api.delete(`/products/${productId}`)
+      await api.delete(`/api/products/${productId}`)
       alert('商品删除成功')
       await fetchProducts()
     } catch (error) {
