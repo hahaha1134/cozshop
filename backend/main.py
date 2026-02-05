@@ -16,7 +16,8 @@ app = FastAPI(
     title="CozShop API",
     description="A modern e-commerce API built with FastAPI and MongoDB",
     version="1.0.0",
-    lifespan=lifespan
+    lifespan=lifespan,
+    openapi_prefix="/api"
 )
 
 # CORS middleware
@@ -29,14 +30,14 @@ app.add_middleware(
 )
 
 # Include routers
-app.include_router(auth.router)
-app.include_router(products.router)
-app.include_router(cart.router)
-app.include_router(orders.router)
-app.include_router(reviews.router)
-app.include_router(favorites.router)
-app.include_router(users.router)
-app.include_router(system.router)
+app.include_router(auth.router, prefix="/api")
+app.include_router(products.router, prefix="/api")
+app.include_router(cart.router, prefix="/api")
+app.include_router(orders.router, prefix="/api")
+app.include_router(reviews.router, prefix="/api")
+app.include_router(favorites.router, prefix="/api")
+app.include_router(users.router, prefix="/api")
+app.include_router(system.router, prefix="/api")
 
 @app.get("/")
 async def root():
