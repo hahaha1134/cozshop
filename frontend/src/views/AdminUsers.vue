@@ -136,7 +136,7 @@ const handleSearch = () => {
 
 const toggleUserStatus = async (userId, newStatus) => {
   try {
-    await api.put(`/users/${userId}/status`, newStatus ? 'active' : 'inactive')
+    await api.put(`/users/${userId}/status`, { status: newStatus ? 'active' : 'inactive' })
     alert('用户状态更新成功')
     
     // Update local status
@@ -156,7 +156,7 @@ const toggleUserStatus = async (userId, newStatus) => {
 
 const updateUserRole = async (userId, role) => {
   try {
-    await api.put(`/users/${userId}/role`, role)
+    await api.put(`/users/${userId}/role`, { role })
     alert('用户角色更新成功')
   } catch (error) {
     console.error('Failed to update user role:', error)

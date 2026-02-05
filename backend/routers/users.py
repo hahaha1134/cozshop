@@ -49,8 +49,9 @@ async def get_user(user_id: str, admin_id: str = Depends(get_current_admin)):
     )
 
 @router.put("/{user_id}/role")
-async def update_user_role(user_id: str, role: str, admin_id: str = Depends(get_current_admin)):
+async def update_user_role(user_id: str, role_data: dict = Body(...), admin_id: str = Depends(get_current_admin)):
     db = get_database()
+    role = role_data.get("role")
     
     if role not in ["user", "admin"]:
         raise HTTPException(
@@ -100,8 +101,9 @@ async def delete_user(user_id: str, admin_id: str = Depends(get_current_admin)):
     return {"message": "User deleted successfully"}
 
 @router.put("/{user_id}/status")
-async def update_user_status(user_id: str, status: str, admin_id: str = Depends(get_current_admin)):
+async def update_user_status(user_id: str, status_data: dict = Body(...), admin_id: str = Depends(get_current_admin)):
     db = get_database()
+    status = status_data.get("status")
     
     if status not in ["active", "inactive"]:
         raise HTTPException(
