@@ -117,7 +117,7 @@ const removeFromCart = async (productId) => {
 }
 
 const checkout = () => {
-  router.push('/orders')
+  router.push('/checkout')
 }
 
 const handleClearCart = async () => {

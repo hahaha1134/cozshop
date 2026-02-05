@@ -117,7 +117,7 @@ async def create_order(order_data: OrderCreate, user_id: str = Depends(get_curre
     
     # Get cart
     cart = await db.carts.find_one({"user_id": user_id})
-    if not cart or not cart["items"]:
+    if not cart or not cart.get("items"):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Cart is empty"
@@ -129,11 +129,11 @@ async def create_order(order_data: OrderCreate, user_id: str = Depends(get_curre
     # Create order
     order_dict = {
         "user_id": user_id,
-        "orderItems": cart["items"],
-        "totalPrice": total_price,
+        "items": cart["items"],
+        "total_price": total_price,
         "status": "pending",
-        "shippingAddress": order_data.shipping_address,
-        "paymentMethod": order_data.payment_method,
+        "shipping_address": order_data.shippingAddress,
+        "payment_method": order_data.paymentMethod,
         "created_at": datetime.utcnow()
     }
     
@@ -152,21 +152,21 @@ async def create_order(order_data: OrderCreate, user_id: str = Depends(get_curre
     
     return OrderResponse(
         id=str(created_order["_id"]),
-        user_id=created_order["user_id"],
+        user_id=str(created_order["user_id"]),
         orderItems=[
             OrderItem(
-                product_id=item["product_id"],
+                product_id=str(item["product_id"]),
                 name=item["name"],
                 price=item["price"],
                 quantity=item["quantity"],
                 image=item.get("image", "https://via.placeholder.com/300x300")
             )
-            for item in created_order["orderItems"]
+            for item in created_order.get("items", [])
         ],
-        totalPrice=created_order["totalPrice"],
+        totalPrice=created_order.get("total_price", 0),
         status=created_order["status"],
-        shippingAddress=created_order["shippingAddress"],
-        paymentMethod=created_order["paymentMethod"],
+        shippingAddress=created_order.get("shipping_address", {}),
+        paymentMethod=created_order.get("payment_method", ""),
         created_at=created_order["created_at"]
     )
 
