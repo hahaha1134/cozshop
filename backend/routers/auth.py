@@ -37,6 +37,8 @@ async def register(user: UserCreate):
             id=str(created_user["_id"]),
             name=created_user["name"],
             email=created_user["email"],
+            phone=created_user.get("phone", None),
+            address=created_user.get("address", None),
             role=created_user["role"],
             created_at=created_user["created_at"]
         )
@@ -65,6 +67,8 @@ async def login(user: UserLogin):
             id=str(user_data["_id"]),
             name=user_data["name"],
             email=user_data["email"],
+            phone=user_data.get("phone", None),
+            address=user_data.get("address", None),
             role=user_data["role"],
             created_at=user_data["created_at"]
         )
@@ -83,6 +87,8 @@ async def get_profile(user_id: str = Depends(get_current_user)):
         id=str(user["_id"]),
         name=user["name"],
         email=user["email"],
+        phone=user.get("phone", None),
+        address=user.get("address", None),
         role=user["role"],
         created_at=user["created_at"]
     )
