@@ -15,7 +15,7 @@ async def get_products(search: Optional[str] = None, category: Optional[str] = N
     # Build query
     query = {
         "$or": [
-            {"status": "active"},
+            {"status": "approved"},
             {"status": {"$exists": False}}
         ]
     }
