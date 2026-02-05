@@ -162,7 +162,7 @@ const orderStatuses = ref({})
 const fetchData = async () => {
   try {
     // Fetch system status
-    const statusResponse = await api.get('/api/system/status')
+    const statusResponse = await api.get('/system/status')
     const statusData = statusResponse.data
     stats.value = {
       total_products: statusData.statistics.total_products,
@@ -173,12 +173,12 @@ const fetchData = async () => {
     orderStatuses.value = statusData.statistics.order_statuses
     
     // Fetch today's stats
-    const todayResponse = await api.get('/api/system/today')
+    const todayResponse = await api.get('/system/today')
     todayStats.value = todayResponse.data.today
     
     // Fetch sales data
-    const statsResponse = await api.get('/api/system/stats')
-    salesData.value = statsResponse.data
+    const statsResponse = await api.get('/system/stats')
+    salesData.value = statsResponse.data.monthly_sales
     
   } catch (error) {
     console.error('Failed to fetch dashboard data:', error)
