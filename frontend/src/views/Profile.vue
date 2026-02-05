@@ -2,7 +2,7 @@
   <div class="profile-container">
     <div class="profile-header">
       <h1>个人中心</h1>
-      <p class="welcome-text">欢迎，{{ authStore.user?.username }}</p>
+      <p class="welcome-text">欢迎，{{ authStore.user?.name || authStore.user?.username }}</p>
     </div>
 
     <div class="profile-content">
@@ -11,15 +11,68 @@
         <div class="info-grid">
           <div class="info-item">
             <label>用户名</label>
-            <span>{{ authStore.user?.username }}</span>
+            <span>{{ authStore.user?.name || authStore.user?.username }}</span>
           </div>
           <div class="info-item">
             <label>邮箱</label>
             <span>{{ authStore.user?.email }}</span>
           </div>
           <div class="info-item">
+            <label>手机号</label>
+            <span>{{ authStore.user?.phone || '未设置' }}</span>
+          </div>
+          <div class="info-item">
+            <label>收货地址</label>
+            <span>{{ authStore.user?.address || '未设置' }}</span>
+          </div>
+          <div class="info-item">
             <label>注册时间</label>
             <span>{{ formatDate(authStore.user?.created_at) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="profile-section">
+        <h2>修改个人信息</h2>
+        <div class="update-form">
+          <div class="form-group">
+            <label for="name">用户名</label>
+            <input 
+              type="text" 
+              id="name" 
+              v-model="updateForm.name" 
+              placeholder="请输入用户名"
+            >
+          </div>
+          <div class="form-group">
+            <label for="phone">手机号</label>
+            <input 
+              type="tel" 
+              id="phone" 
+              v-model="updateForm.phone" 
+              placeholder="请输入手机号"
+            >
+          </div>
+          <div class="form-group">
+            <label for="address">收货地址</label>
+            <textarea 
+              id="address" 
+              v-model="updateForm.address" 
+              placeholder="请输入收货地址"
+              rows="3"
+            ></textarea>
+          </div>
+          <div class="form-actions">
+            <button 
+              @click="updateProfile" 
+              class="update-btn"
+              :disabled="isUpdating"
+            >
+              {{ isUpdating ? '更新中...' : '更新信息' }}
+            </button>
+          </div>
+          <div v-if="message" class="message" :class="messageType">
+            {{ message }}
           </div>
         </div>
       </div>

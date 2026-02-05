@@ -125,3 +125,58 @@ async def update_user_status(user_id: str, status: str, admin_id: str = Depends(
         )
     
     return {"message": "User status updated successfully"}
+
+@router.put("/profile/update")
+async def update_profile(
+    name: Optional[str] = Body(None, description="用户名"),
+    phone: Optional[str] = Body(None, description="手机号"),
+    address: Optional[str] = Body(None, description="收货地址"),
+    user_id: str = Depends(get_current_user)
+):
+    db = get_database()
+    
+    # Prepare update data
+    update_data = {}
+    if name:
+        update_data["name"] = name
+    if phone:
+        update_data["phone"] = phone
+    if address:
+        update_data["address"] = address
+    
+    if not update_data:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No data provided for update"
+        )
+    
+    try:
+        result = await db.users.update_one(
+            {"_id": ObjectId(user_id)},
+            {"$set": update_data}
+        )
+    except:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+    
+    if result.modified_count == 0:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+    
+    # Get updated user
+    updated_user = await db.users.find_one({"_id": ObjectId(user_id)})
+    
+    return {
+        "message": "Profile updated successfully",
+        "user": UserResponse(
+            id=str(updated_user["_id"]),
+            name=updated_user["name"],
+            email=updated_user["email"],
+            role=updated_user.get("role", "user"),
+            created_at=updated_user["created_at"]
+        )
+    }
