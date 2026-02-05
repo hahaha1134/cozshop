@@ -9,7 +9,7 @@ from datetime import datetime
 router = APIRouter(prefix="/api/products", tags=["Products"])
 
 @router.get("", response_model=List[ProductResponse])
-async def get_products(search: Optional[str] = None, category: Optional[str] = None, min_price: Optional[float] = None, max_price: Optional[float] = None, user_id: Optional[str] = Depends(get_current_user)):
+async def get_products(search: Optional[str] = None, category: Optional[str] = None, min_price: Optional[float] = None, max_price: Optional[float] = None):
     db = get_database()
     
     print("=== Product API Call Received ===")
@@ -17,13 +17,71 @@ async def get_products(search: Optional[str] = None, category: Optional[str] = N
     
     # For public/homepage, always only show approved products
     # This ensures that inactive products are not visible on homepage
-    # regardless of whether the user is admin or not
     query = {
         "$or": [
             {"status": "approved"},
             {"status": {"$exists": False}}
         ]
     }
+    
+    if search:
+        query["$and"] = query.get("$and", []) + [
+            {"$or": [
+                {"name": {"$regex": search, "$options": "i"}},
+                {"description": {"$regex": search, "$options": "i"}}
+            ]}
+        ]
+    
+    if category:
+        query["$and"] = query.get("$and", []) + [
+            {"category": category}
+        ]
+    
+    if min_price is not None:
+        query["$and"] = query.get("$and", []) + [
+            {"price": {"$gte": min_price}}
+        ]
+    
+    if max_price is not None:
+        query["$and"] = query.get("$and", []) + [
+            {"price": {"$lte": max_price}}
+        ]
+    
+    print(f"Query: {query}")
+    
+    products = await db.products.find(query).to_list(length=100)
+    print(f"Found {len(products)} products")
+    
+    if products:
+        print(f"First 3 products: {[p.get('name') for p in products[:3]]}")
+    
+    return [
+        ProductResponse(
+            id=str(product["_id"]),
+            name=product["name"],
+            description=product["description"],
+            price=product["price"],
+            category=product["category"],
+            stock=product["stock"],
+            image=product.get("image", "https://via.placeholder.com/300x300"),
+            rating=product.get("rating", 0),
+            numReviews=product.get("numReviews", 0),
+            created_at=product["created_at"],
+            status=product.get("status", "pending"),
+            seller_id=product.get("seller_id")
+        )
+        for product in products
+    ]
+
+@router.get("/all", response_model=List[ProductResponse])
+async def get_all_products(search: Optional[str] = None, category: Optional[str] = None, min_price: Optional[float] = None, max_price: Optional[float] = None, user_id: str = Depends(get_current_admin)):
+    db = get_database()
+    
+    print("=== Get All Products API Call Received ===")
+    print(f"Params: search={search}, category={category}, min_price={min_price}, max_price={max_price}")
+    
+    # For admin, return all products regardless of status
+    query = {}
     
     if search:
         query["$and"] = query.get("$and", []) + [

@@ -93,7 +93,8 @@ onMounted(async () => {
 
 const fetchProducts = async () => {
   try {
-    const response = await api.get('/products')
+    // Use admin endpoint to get all products regardless of status
+    const response = await api.get('/products/all')
     products.value = response.data
     filteredProducts.value = [...products.value]
   } catch (error) {
