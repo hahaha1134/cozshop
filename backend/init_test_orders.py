@@ -21,3 +21,17 @@ async def init_test_orders():
     # Create test orders
     test_orders = []
     
+    # Create orders for the last 6 months
+    for i in range(6):
+        # Create 2-3 orders per month
+        for j in range(2 + i % 2):
+            # Random products for this order
+            order_products = products[:2 + j % 2]
+            items = []
+            total_price = 0
+            
+            for product in order_products:
+                quantity = 1 + j % 2
+                item_price = product.get('price', 0)
+                items.append({
+                    'product_id':
