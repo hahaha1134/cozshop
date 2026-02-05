@@ -200,107 +200,112 @@ const fetchData = async () => {
 
 // Initialize ECharts
 const initCharts = () => {
-  // Sales chart
-  if (salesChartRef.value) {
-    salesChart = echarts.init(salesChartRef.value)
-    const salesOption = {
-      tooltip: {
-        trigger: 'axis',
-        axisPointer: {
-          type: 'cross',
-          label: {
-            backgroundColor: '#6a7985'
-          }
-        }
-      },
-      legend: {
-        data: ['订单数', '销售额']
-      },
-      grid: {
-        left: '3%',
-        right: '4%',
-        bottom: '3%',
-        containLabel: true
-      },
-      xAxis: {
-        type: 'category',
-        boundaryGap: false,
-        data: salesData.value.map(item => item.month)
-      },
-      yAxis: [
-        {
-          type: 'value',
-          name: '订单数',
-          position: 'left'
-        },
-        {
-          type: 'value',
-          name: '销售额',
-          position: 'right',
-          axisLabel: {
-            formatter: '¥{value}'
-          }
-        }
-      ],
-      series: [
-        {
-          name: '订单数',
-          type: 'line',
-          data: salesData.value.map(item => item.orders),
-          smooth: true,
-          itemStyle: {
-            color: '#5470c6'
-          }
-        },
-        {
-          name: '销售额',
-          type: 'bar',
-          yAxisIndex: 1,
-          data: salesData.value.map(item => item.revenue),
-          itemStyle: {
-            color: '#91cc75'
-          }
-        }
-      ]
-    }
-    salesChart.setOption(salesOption)
-  }
-  
-  // Order status chart
-  if (orderStatusChartRef.value) {
-    orderStatusChart = echarts.init(orderStatusChartRef.value)
-    const orderStatusOption = {
-      tooltip: {
-        trigger: 'item'
-      },
-      legend: {
-        orient: 'vertical',
-        left: 'left'
-      },
-      series: [
-        {
-          name: '订单状态',
-          type: 'pie',
-          radius: '50%',
-          data: [
-            { value: orderStatuses.value.pending || 0, name: '待处理' },
-            { value: orderStatuses.value.processing || 0, name: '处理中' },
-            { value: orderStatuses.value.shipped || 0, name: '已发货' },
-            { value: orderStatuses.value.delivered || 0, name: '已送达' },
-            { value: orderStatuses.value.cancelled || 0, name: '已取消' }
-          ],
-          emphasis: {
-            itemStyle: {
-              shadowBlur: 10,
-              shadowOffsetX: 0,
-              shadowColor: 'rgba(0, 0, 0, 0.5)'
+  // Wait for DOM to be fully rendered
+  setTimeout(() => {
+    // Sales chart
+    if (salesChartRef.value) {
+      console.log('Initializing sales chart with data:', salesData.value)
+      salesChart = echarts.init(salesChartRef.value)
+      const salesOption = {
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: {
+            type: 'cross',
+            label: {
+              backgroundColor: '#6a7985'
             }
           }
-        }
-      ]
+        },
+        legend: {
+          data: ['订单数', '销售额']
+        },
+        grid: {
+          left: '3%',
+          right: '4%',
+          bottom: '3%',
+          containLabel: true
+        },
+        xAxis: {
+          type: 'category',
+          boundaryGap: false,
+          data: salesData.value.map(item => item.month)
+        },
+        yAxis: [
+          {
+            type: 'value',
+            name: '订单数',
+            position: 'left'
+          },
+          {
+            type: 'value',
+            name: '销售额',
+            position: 'right',
+            axisLabel: {
+              formatter: '¥{value}'
+            }
+          }
+        ],
+        series: [
+          {
+            name: '订单数',
+            type: 'line',
+            data: salesData.value.map(item => item.orders),
+            smooth: true,
+            itemStyle: {
+              color: '#5470c6'
+            }
+          },
+          {
+            name: '销售额',
+            type: 'bar',
+            yAxisIndex: 1,
+            data: salesData.value.map(item => item.revenue),
+            itemStyle: {
+              color: '#91cc75'
+            }
+          }
+        ]
+      }
+      salesChart.setOption(salesOption)
     }
-    orderStatusChart.setOption(orderStatusOption)
-  }
+    
+    // Order status chart
+    if (orderStatusChartRef.value) {
+      console.log('Initializing order status chart with data:', orderStatuses.value)
+      orderStatusChart = echarts.init(orderStatusChartRef.value)
+      const orderStatusOption = {
+        tooltip: {
+          trigger: 'item'
+        },
+        legend: {
+          orient: 'vertical',
+          left: 'left'
+        },
+        series: [
+          {
+            name: '订单状态',
+            type: 'pie',
+            radius: '50%',
+            data: [
+              { value: orderStatuses.value.pending || 0, name: '待处理' },
+              { value: orderStatuses.value.processing || 0, name: '处理中' },
+              { value: orderStatuses.value.shipped || 0, name: '已发货' },
+              { value: orderStatuses.value.delivered || 0, name: '已送达' },
+              { value: orderStatuses.value.cancelled || 0, name: '已取消' }
+            ],
+            emphasis: {
+              itemStyle: {
+                shadowBlur: 10,
+                shadowOffsetX: 0,
+                shadowColor: 'rgba(0, 0, 0, 0.5)'
+              }
+            }
+          }
+        ]
+      }
+      orderStatusChart.setOption(orderStatusOption)
+    }
+  }, 100)
 }
 
 // Handle window resize
