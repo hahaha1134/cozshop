@@ -69,7 +69,8 @@ async def get_products(search: Optional[str] = None, category: Optional[str] = N
             numReviews=product.get("numReviews", 0),
             created_at=product["created_at"],
             status=product.get("status", "pending"),
-            seller_id=product.get("seller_id")
+            seller_id=product.get("seller_id"),
+            is_pinned=product.get("is_pinned", False)
         )
         for product in products
     ]
@@ -109,7 +110,8 @@ async def get_all_products(search: Optional[str] = None, category: Optional[str]
     
     print(f"Query: {query}")
     
-    products = await db.products.find(query).to_list(length=100)
+    # Sort products: pinned products first, then by creation time (newest first)
+    products = await db.products.find(query).sort([("is_pinned", -1), ("created_at", -1)]).to_list(length=100)
     print(f"Found {len(products)} products")
     
     if products:
@@ -128,7 +130,8 @@ async def get_all_products(search: Optional[str] = None, category: Optional[str]
             numReviews=product.get("numReviews", 0),
             created_at=product["created_at"],
             status=product.get("status", "pending"),
-            seller_id=product.get("seller_id")
+            seller_id=product.get("seller_id"),
+            is_pinned=product.get("is_pinned", False)
         )
         for product in products
     ]
@@ -150,7 +153,8 @@ async def get_my_products(user_id: str = Depends(get_current_user)):
             numReviews=product.get("numReviews", 0),
             created_at=product["created_at"],
             status=product.get("status", "pending"),
-            seller_id=product.get("seller_id")
+            seller_id=product.get("seller_id"),
+            is_pinned=product.get("is_pinned", False)
         )
         for product in products
     ]
@@ -184,7 +188,8 @@ async def get_product(product_id: str):
         numReviews=product.get("numReviews", 0),
         created_at=product["created_at"],
         status=product.get("status", "pending"),
-        seller_id=product.get("seller_id")
+        seller_id=product.get("seller_id"),
+        is_pinned=product.get("is_pinned", False)
     )
 
 @router.post("", response_model=ProductResponse, status_code=status.HTTP_201_CREATED)
@@ -209,7 +214,8 @@ async def create_product(product: ProductCreate, user_id: str = Depends(get_curr
         image=created_product.get("image", "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDMwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjZjBmMGMwIi8+CjxwYXRoIGQ9Ik0xNTAgMTUwIEMxNzcuNjEgMTUwIDE5NSAxMzIuNjEgMTk1IDEwNSBDMTk1IDc3LjM5IDE3Ny42MSA2MCAxNTAgNjAgQzEyMi4zOSA2MCAxMDUgNzcuMzkgMTA1IDEwNSBDMTA1IDEzMi42MSAxMjIuMzkgMTUwIDE1MCAxNTAiIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4yIi8+Cjx0ZXh0IHg9IjE1MCIgeT0iMTY1IiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiMwMDAiPk5vIEltYWdlPC90ZXh0Pgo8L3N2Zz4="),
         rating=created_product.get("rating", 0),
         numReviews=created_product.get("numReviews", 0),
-        created_at=created_product["created_at"]
+        created_at=created_product["created_at"],
+        is_pinned=created_product.get("is_pinned", False)
     )
 
 @router.put("/{product_id}/status")
@@ -344,7 +350,8 @@ async def update_product(product_id: str, product_update: ProductUpdate, user_id
         image=updated_product.get("image", "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDMwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjZjBmMGMwIi8+CjxwYXRoIGQ9Ik0xNTAgMTUwIEMxNzcuNjEgMTUwIDE5NSAxMzIuNjEgMTk1IDEwNSBDMTk1IDc3LjM5IDE3Ny42MSA2MCAxNTAgNjAgQzEyMi4zOSA2MCAxMDUgNzcuMzkgMTA1IDEwNSBDMTA1IDEzMi42MSAxMjIuMzkgMTUwIDE1MCAxNTAiIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4yIi8+Cjx0ZXh0IHg9IjE1MCIgeT0iMTY1IiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiMwMDAiPk5vIEltYWdlPC90ZXh0Pgo8L3N2Zz4="),
         rating=updated_product.get("rating", 0),
         numReviews=updated_product.get("numReviews", 0),
-        created_at=updated_product["created_at"]
+        created_at=updated_product["created_at"],
+        is_pinned=updated_product.get("is_pinned", False)
     )
 
 @router.delete("/{product_id}")

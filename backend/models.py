@@ -62,6 +62,7 @@ class ProductResponse(ProductBase):
     created_at: datetime
     status: Optional[str] = "pending"
     seller_id: Optional[str] = None
+    is_pinned: bool = False
 
     class Config:
         from_attributes = True
