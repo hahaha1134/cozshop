@@ -155,11 +155,14 @@ async def update_profile(
             {"_id": ObjectId(user_id)},
             {"$set": update_data}
         )
-    except:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
-        )
+    except Exception as e:
+        # Only catch database operation errors, not authentication errors
+        if "ObjectId" in str(e):
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found"
+            )
+        raise
     
     if result.modified_count == 0:
         raise HTTPException(
