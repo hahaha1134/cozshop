@@ -12,6 +12,9 @@ router = APIRouter(prefix="/api/products", tags=["Products"])
 async def get_products(search: Optional[str] = None, category: Optional[str] = None, min_price: Optional[float] = None, max_price: Optional[float] = None):
     db = get_database()
     
+    print("=== Product API Call Received ===")
+    print(f"Params: search={search}, category={category}, min_price={min_price}, max_price={max_price}")
+    
     # Build query
     query = {
         "$or": [
@@ -43,7 +46,14 @@ async def get_products(search: Optional[str] = None, category: Optional[str] = N
             {"price": {"$lte": max_price}}
         ]
     
+    print(f"Query: {query}")
+    
     products = await db.products.find(query).to_list(length=100)
+    print(f"Found {len(products)} products")
+    
+    if products:
+        print(f"First 3 products: {[p.get('name') for p in products[:3]]}")
+    
     return [
         ProductResponse(
             id=str(product["_id"]),
