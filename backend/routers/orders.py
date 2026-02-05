@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Body
 from typing import List
 from models import OrderCreate, OrderResponse, OrderItem
 from database import get_database
@@ -132,7 +132,7 @@ async def create_order(order_data: OrderCreate, user_id: str = Depends(get_curre
         "items": cart["items"],
         "total_price": total_price,
         "status": "pending",
-        "shipping_address": order_data.shippingAddress,
+        "shipping_address": order_data.shippingAddress.model_dump(),
         "payment_method": order_data.paymentMethod,
         "created_at": datetime.utcnow()
     }
@@ -171,7 +171,7 @@ async def create_order(order_data: OrderCreate, user_id: str = Depends(get_curre
     )
 
 @router.put("/{order_id}/status")
-async def update_order_status(order_id: str, status: str, user_id: str = Depends(get_current_admin)):
+async def update_order_status(order_id: str, status_data: dict = Body(...), user_id: str = Depends(get_current_admin)):
     db = get_database()
     try:
         order = await db.orders.find_one({"_id": ObjectId(order_id)})
@@ -185,6 +185,13 @@ async def update_order_status(order_id: str, status: str, user_id: str = Depends
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Order not found"
+        )
+    
+    status = status_data.get("status")
+    if not status:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Status is required"
         )
     
     valid_statuses = ["pending", "processing", "shipped", "delivered", "cancelled"]
