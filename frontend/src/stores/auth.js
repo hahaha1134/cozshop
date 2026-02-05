@@ -77,6 +77,11 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  const updateUser = (userData) => {
+    user.value = userData
+    localStorage.setItem('user', JSON.stringify(userData))
+  }
+
   return {
     token,
     user,
@@ -87,6 +92,7 @@ export const useAuthStore = defineStore('auth', () => {
     login,
     register,
     logout,
-    fetchProfile
+    fetchProfile,
+    updateUser
   }
 })
