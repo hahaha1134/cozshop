@@ -131,7 +131,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
 import api from '@/utils/api'
@@ -193,18 +193,26 @@ const fetchData = async () => {
     loading.value = false
     // Initialize charts after data is loaded
     if (!loading.value) {
-      initCharts()
+      await initCharts()
     }
   }
 }
 
 // Initialize ECharts
-const initCharts = () => {
-  // Wait for DOM to be fully rendered
-  setTimeout(() => {
+const initCharts = async () => {
+  try {
+    // Wait for DOM to be fully rendered
+    await nextTick()
+    
+    console.log('DOM ready, initializing charts...')
+    console.log('salesChartRef.value:', salesChartRef.value)
+    console.log('orderStatusChartRef.value:', orderStatusChartRef.value)
+    console.log('salesData.value:', salesData.value)
+    console.log('orderStatuses.value:', orderStatuses.value)
+    
     // Sales chart
     if (salesChartRef.value) {
-      console.log('Initializing sales chart with data:', salesData.value)
+      console.log('Initializing sales chart...')
       salesChart = echarts.init(salesChartRef.value)
       const salesOption = {
         tooltip: {
@@ -267,11 +275,14 @@ const initCharts = () => {
         ]
       }
       salesChart.setOption(salesOption)
+      console.log('Sales chart initialized successfully')
+    } else {
+      console.error('salesChartRef.value is null')
     }
     
     // Order status chart
     if (orderStatusChartRef.value) {
-      console.log('Initializing order status chart with data:', orderStatuses.value)
+      console.log('Initializing order status chart...')
       orderStatusChart = echarts.init(orderStatusChartRef.value)
       const orderStatusOption = {
         tooltip: {
@@ -304,8 +315,13 @@ const initCharts = () => {
         ]
       }
       orderStatusChart.setOption(orderStatusOption)
+      console.log('Order status chart initialized successfully')
+    } else {
+      console.error('orderStatusChartRef.value is null')
     }
-  }, 100)
+  } catch (error) {
+    console.error('Error initializing charts:', error)
+  }
 }
 
 // Handle window resize
