@@ -6,7 +6,7 @@ from auth import get_current_user
 from bson import ObjectId
 from datetime import datetime
 
-router = APIRouter(prefix="/favorites", tags=["Favorites"])
+router = APIRouter(prefix="/api/favorites", tags=["Favorites"])
 
 @router.get("", response_model=List[FavoriteResponse])
 async def get_favorites(user_id: str = Depends(get_current_user)):

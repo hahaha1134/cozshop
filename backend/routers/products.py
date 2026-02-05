@@ -6,7 +6,7 @@ from auth import get_current_user, get_current_admin
 from bson import ObjectId
 from datetime import datetime
 
-router = APIRouter(prefix="/products", tags=["Products"])
+router = APIRouter(prefix="/api/products", tags=["Products"])
 
 @router.get("", response_model=List[ProductResponse])
 async def get_products(search: Optional[str] = None, category: Optional[str] = None, min_price: Optional[float] = None, max_price: Optional[float] = None):

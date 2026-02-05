@@ -6,7 +6,7 @@ from auth import get_current_user
 from bson import ObjectId
 from datetime import datetime
 
-router = APIRouter(prefix="/cart", tags=["Cart"])
+router = APIRouter(prefix="/api/cart", tags=["Cart"])
 
 @router.get("", response_model=CartResponse)
 async def get_cart(user_id: str = Depends(get_current_user)):

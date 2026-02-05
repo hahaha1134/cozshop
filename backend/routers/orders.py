@@ -6,7 +6,7 @@ from auth import get_current_user, get_current_admin
 from bson import ObjectId
 from datetime import datetime
 
-router = APIRouter(prefix="/orders", tags=["Orders"])
+router = APIRouter(prefix="/api/orders", tags=["Orders"])
 
 @router.get("", response_model=List[OrderResponse])
 async def get_orders(user_id: str = Depends(get_current_user)):

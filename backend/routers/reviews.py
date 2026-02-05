@@ -6,7 +6,7 @@ from auth import get_current_user
 from bson import ObjectId
 from datetime import datetime
 
-router = APIRouter(prefix="/reviews", tags=["Reviews"])
+router = APIRouter(prefix="/api/reviews", tags=["Reviews"])
 
 @router.get("/product/{product_id}", response_model=List[ReviewResponse])
 async def get_product_reviews(product_id: str):
