@@ -14,10 +14,10 @@
       <div class="product-content">
         <div class="product-image-section">
           <img 
-            :src="product.image || 'https://via.placeholder.com/500x400?text=No+Image'" 
+            :src="product.image || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAwIiBoZWlnaHQ9IjQwMCIgdmlld0JveD0iMCAwIDUwMCA0MDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI1MDAiIGhlaWdodD0iNDAwIiBmaWxsPSIjZjBmMGMwIi8+CjxwYXRoIGQ9Ik0yNTAgMjUwIEMzMjcuNjEgMjUwIDM3NSAxNzIuNjEgMzc1IDEwNSBDMzc1IDM3LjM5IDMyNy42MSAwIDI1MCAwIEMxNzIuMzkgMCAxMjUgMzcuMzkgMTI1IDEwNSBDMTI1IDE3Mi42MSAxNzIuMzkgMjUwIDI1MCAyNTAiIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4yIi8+Cjx0ZXh0IHg9IjI1MCIgeT0iMjE1IiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiMwMDAiPk5vIEltYWdlPC90ZXh0Pgo8L3N2Zz4='" 
             :alt="product.name" 
             class="product-image"
-            @error="$event.target.src = 'https://via.placeholder.com/500x400?text=No+Image'"
+            @error="$event.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAwIiBoZWlnaHQ9IjQwMCIgdmlld0JveD0iMCAwIDUwMCA0MDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI1MDAiIGhlaWdodD0iNDAwIiBmaWxsPSIjZjBmMGMwIi8+CjxwYXRoIGQ9Ik0yNTAgMjUwIEMzMjcuNjEgMjUwIDM3NSAxNzIuNjEgMzc1IDEwNSBDMzc1IDM3LjM5IDMyNy42MSAwIDI1MCAwIEMxNzIuMzkgMCAxMjUgMzcuMzkgMTI1IDEwNSBDMTI1IDE3Mi42MSAxNzIuMzkgMjUwIDI1MCAyNTAiIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4yIi8+Cjx0ZXh0IHg9IjI1MCIgeT0iMjE1IiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiMwMDAiPk5vIEltYWdlPC90ZXh0Pgo8L3N2Zz4='" 
           />
         </div>
         
