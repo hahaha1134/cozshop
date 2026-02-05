@@ -179,6 +179,10 @@ async def update_profile(
     # Get updated user
     updated_user = await db.users.find_one({"_id": ObjectId(user_id)})
     print(f"Updated user: {updated_user}")
+    phone_value = updated_user.get("phone", "")
+    address_value = updated_user.get("address", "")
+    print(f"Phone value: {phone_value}, type: {type(phone_value)}")
+    print(f"Address value: {address_value}, type: {type(address_value)}")
     
     return {
         "message": "Profile updated successfully",
@@ -186,8 +190,8 @@ async def update_profile(
             "id": str(updated_user["_id"]),
             "name": updated_user["name"],
             "email": updated_user["email"],
-            "phone": updated_user.get("phone", ""),
-            "address": updated_user.get("address", ""),
+            "phone": phone_value,
+            "address": address_value,
             "role": updated_user.get("role", "user"),
             "created_at": updated_user["created_at"]
         }
