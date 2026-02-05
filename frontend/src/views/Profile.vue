@@ -120,7 +120,44 @@
 
       <div class="profile-section">
         <h2>账户设置</h2>
-        <button @click="handleLogout" class="logout-btn">退出登录</button>
+        <div class="update-form">
+          <div class="form-group">
+            <label for="name">用户名</label>
+            <input 
+              type="text" 
+              id="name"
+              v-model="updateForm.name"
+              placeholder="请输入用户名"
+            >
+          </div>
+          <div class="form-group">
+            <label for="phone">手机号</label>
+            <input 
+              type="tel" 
+              id="phone"
+              v-model="updateForm.phone"
+              placeholder="请输入手机号"
+            >
+          </div>
+          <div class="form-group">
+            <label for="address">收货地址</label>
+            <textarea 
+              id="address"
+              v-model="updateForm.address"
+              placeholder="请输入收货地址"
+              rows="3"
+            ></textarea>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button 
+            @click="updateProfile" 
+            class="update-btn"
+            :disabled="isUpdating"
+          >
+            {{ isUpdating ? '更新中...' : '更新信息' }}
+          </button>
+        </div>
       </div>
     </div>
   </div>
