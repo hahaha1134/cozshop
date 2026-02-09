@@ -143,8 +143,6 @@ const handleDeliver = async (orderId) => {
     try {
       await api.put(`/orders/${orderId}/deliver`)
       alert('发货成功！')
-      // 更新订单状态
-      orderStatuses[orderId] = 'shipped'
       // 刷新订单列表
       await fetchOrders()
     } catch (error) {
@@ -256,36 +254,38 @@ const formatDate = (dateString) => {
 }
 
 .order-status-badge {
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
+  padding: 0.75rem 1.5rem;
+  border-radius: 50px;
   font-size: 0.875rem;
   font-weight: 600;
   display: inline-block;
+  text-align: center;
+  min-width: 80px;
 }
 
 .status-pending {
-  background: #feebc8;
-  color: #744210;
+  background: #fde68a;
+  color: #78350f;
 }
 
 .status-processing {
-  background: #bee3f8;
-  color: #2a4365;
+  background: #bfdbfe;
+  color: #1e40af;
 }
 
 .status-shipped {
-  background: #c6f6d5;
-  color: #22543d;
+  background: #bbf7d0;
+  color: #166534;
 }
 
 .status-delivered {
-  background: #9ae6b4;
-  color: #22543d;
+  background: #bbf7d0;
+  color: #166534;
 }
 
 .status-cancelled {
-  background: #fed7d7;
-  color: #742a2a;
+  background: #fecaca;
+  color: #991b1b;
 }
 
 @media (max-width: 768px) {
