@@ -36,10 +36,9 @@
               class="order-item"
             >
               <img 
-                :src="item.image || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjZjBmMGMwIi8+CjxwYXRoIGQ9Ik01MCA1MCBDNzcuNjEgNTAgMTAwIDIyLjYxIDEwMCAwIEMxMDAgMCA3Ny42MSAwIDUwIDAgQzIyLjM5IDAgMCAyMi42MSAwIDUwIEMwIDc3LjYxIDIyLjM5IDEwMCA1MCAxMDAiIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4yIi8+Cjx0ZXh0IHg9IjUwIiB5PSI1NSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEwIiBmaWxsPSIjMDAwIj5ObyBJbmMGMwIi8+CjxwYXRoIGQ9Ik0xNTAgMTUwIEMxNzcuNjEgMTUwIDE5NSAxMzIuNjEgMTk1IDEwNSBDMTk1IDc3LjM5IDE3Ny42MSA2MCAxNTAgNjAgQzEyMi4zOSA2MCAxMDUgNzcuMzkgMTA1IDEwNSBDMTA1IDEzMi42MSAxMjIuMzkgMTUwIDE1MCAxNTAiIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4yIi8+Cjx0ZXh0IHg9IjE1MCIgeT0iMTE1IiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiMwMDAiPk5vIEltYWdlPC90ZXh0Pgo8L3N2Zz4='" 
+                :src="item.image || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjZjBmMGMwIi8+CjxwYXRoIGQ9Ik01MCA1MCBDNzcuNjEgNTAgMTAwIDIyLjYxIDEwMCAwIEMxMDAgMCA3Ny42MSAwIDUwIDAgQzIyLjM5IDAgMCAyMi42MSAwIDUwIEMwIDc3LjYxIDIyLjM5IDEwMCA1MCAxMDAiIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4yIi8+Cjx0ZXh0IHg9IjUwIiB5PSI1NSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEwIiBmaWxsPSIjMDAwIj5ObyBJbWFnZTwvdGV4dD4KPC9zdmc='" 
                 :alt="item.name" 
                 class="item-image"
-                @error="$event.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjZjBmMGMwIi8+CjxwYXRoIGQ9Ik01MCA1MCBDNzcuNjEgNTAgMTAwIDIyLjYxIDEwMCAwIEMxMDAgMCA3Ny42MSAwIDUwIDAgQzIyLjM5IDAgMCAyMi42MSAwIDUwIEMwIDc3LjYxIDIyLjM5IDEwMCA1MCAxMDAiIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4yIi8+Cjx0ZXh0IHg9IjUwIiB5PSI1NSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEwIiBmaWxsPSIjMDAwIj5ObyBJbWFnZTwvdGV4dD4KPC9zdmc+'" 
               />
               <div class="item-details">
                 <h4 class="item-name">{{ item.name }}</h4>
@@ -55,9 +54,12 @@
               <span>¥{{ order.totalPrice.toFixed(2) }}</span>
             </div>
             <div class="order-actions">
-              <router-link :to="`/order/${order.id}`" class="btn btn-secondary btn-sm">
+              <button 
+                class="btn btn-secondary btn-sm"
+                @click="viewOrderDetails(order.id)"
+              >
                 查看详情
-              </router-link>
+              </button>
             </div>
           </div>
         </div>
@@ -68,7 +70,10 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import api from '@/utils/api'
+
+const router = useRouter()
 
 const orders = ref([])
 const loading = ref(true)
@@ -104,6 +109,10 @@ const getStatusText = (status) => {
     cancelled: '已取消'
   }
   return statusMap[status] || status
+}
+
+const viewOrderDetails = (orderId) => {
+  router.push(`/order/${orderId}`)
 }
 
 onMounted(() => {
