@@ -20,10 +20,7 @@ async def get_products(search: Optional[str] = None, category: Optional[str] = N
     # For public/homepage, always only show approved products
     # This ensures that inactive products are not visible on homepage
     query = {
-        "$or": [
-            {"status": "approved"},
-            {"status": {"$exists": False}}
-        ]
+        "status": "approved"
     }
     
     if search:
@@ -165,13 +162,10 @@ async def get_my_products(user_id: str = Depends(get_current_user)):
 async def get_product(product_id: str):
     db = get_database()
     try:
-        # Only show approved products or products without status
+        # Only show approved products
         product = await db.products.find_one({
             "_id": ObjectId(product_id),
-            "$or": [
-                {"status": "approved"},
-                {"status": {"$exists": False}}
-            ]
+            "status": "approved"
         })
     except:
         raise HTTPException(
