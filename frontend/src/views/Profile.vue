@@ -88,6 +88,9 @@
           >
             {{ status.label }}
           </button>
+          <router-link to="/product/create" class="btn btn-primary btn-sm">
+            发布新商品
+          </router-link>
         </div>
         <div v-if="loadingProducts" class="loading">
           <div class="spinner"></div>

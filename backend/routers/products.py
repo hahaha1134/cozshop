@@ -209,29 +209,38 @@ async def create_product(
     condition: str = Form(...),
     tradeMethod: str = Form(...),
     tradeAddress: str = Form(...),
-    image: Optional[UploadFile] = File(None),
+    images: List[UploadFile] = File(None),
     user_id: str = Depends(get_current_user)
 ):
     db = get_database()
     
     # 处理图片上传
     image_url = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDMwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjZjBmMGMwIi8+CjxwYXRoIGQ9Ik0xNTAgMTUwIEMxNzcuNjEgMTUwIDE5NSAxMzIuNjEgMTk1IDEwNSBDMTk1IDc3LjM5IDE3Ny42MSA2MCAxNTAgNjAgQzEyMi4zOSA2MCAxMDUgNzcuMzkgMTA1IDEwNSBDMTA1IDEzMi42MSAxMjIuMzkgMTUwIDE1MCAxNTAiIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4yIi8+Cjx0ZXh0IHg9IjE1MCIgeT0iMTY1IiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiMwMDAiPk5vIEltYWdlPC90ZXh0Pgo8L3N2Zz4="
+    image_urls = []
     
-    if image:
-        # 生成唯一文件名
-        file_extension = os.path.splitext(image.filename)[1]
-        unique_filename = f"{uuid.uuid4()}{file_extension}"
-        file_path = os.path.join(UPLOAD_DIR, unique_filename)
-        
-        # 保存文件
-        try:
-            with open(file_path, "wb") as f:
-                content = await image.read()
-                f.write(content)
-            # 生成图片URL
-            image_url = f"/uploads/{unique_filename}"
-        except Exception as e:
-            print(f"Error saving image: {e}")
+    if images:
+        # 限制最多5张图片
+        images = images[:5]
+        for image in images:
+            # 生成唯一文件名
+            file_extension = os.path.splitext(image.filename)[1]
+            unique_filename = f"{uuid.uuid4()}{file_extension}"
+            file_path = os.path.join(UPLOAD_DIR, unique_filename)
+            
+            # 保存文件
+            try:
+                with open(file_path, "wb") as f:
+                    content = await image.read()
+                    f.write(content)
+                # 生成图片URL
+                img_url = f"/uploads/{unique_filename}"
+                image_urls.append(img_url)
+            except Exception as e:
+                print(f"Error saving image: {e}")
+    
+    # 如果有上传的图片，使用第一张作为主图
+    if image_urls:
+        image_url = image_urls[0]
     
     # 创建产品字典
     product_dict = {
@@ -244,6 +253,7 @@ async def create_product(
         "tradeMethod": tradeMethod,
         "tradeAddress": tradeAddress,
         "image": image_url,
+        "images": image_urls,
         "created_at": datetime.utcnow(),
         "rating": 0,
         "numReviews": 0,

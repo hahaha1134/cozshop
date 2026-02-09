@@ -41,6 +41,7 @@ class ProductBase(BaseModel):
     category: str
     stock: int = Field(..., ge=0)
     image: Optional[str] = DEFAULT_IMAGE
+    images: Optional[List[str]] = []
 
 class ProductCreate(ProductBase):
     pass
@@ -52,6 +53,7 @@ class ProductUpdate(BaseModel):
     category: Optional[str] = None
     stock: Optional[int] = None
     image: Optional[str] = None
+    images: Optional[List[str]] = None
     rating: Optional[float] = None
     numReviews: Optional[int] = None
 

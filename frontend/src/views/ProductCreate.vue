@@ -93,18 +93,21 @@
             </div>
             
             <div class="form-group">
-              <label for="image">商品图片</label>
+              <label for="images">商品图片 (最多5张)</label>
               <input 
-                id="image" 
+                id="images" 
                 type="file" 
                 accept="image/*" 
+                multiple 
                 @change="handleImageUpload"
               />
-              <div v-if="previewImage" class="image-preview">
-                <img :src="previewImage" alt="预览图片" />
-                <button type="button" class="btn btn-sm btn-danger" @click="removeImage">移除图片</button>
+              <div v-if="previewImages.length > 0" class="images-preview">
+                <div v-for="(preview, index) in previewImages" :key="index" class="image-preview-item">
+                  <img :src="preview" alt="预览图片" />
+                  <button type="button" class="btn btn-sm btn-danger" @click="removeImage(index)">移除</button>
+                </div>
               </div>
-              <p class="form-hint">请选择本地图片文件上传</p>
+              <p class="form-hint">请选择本地图片文件上传，最多支持5张图片</p>
             </div>
           </div>
           
@@ -148,8 +151,8 @@ import api from '@/utils/api'
 
 const router = useRouter()
 const loading = ref(false)
-const previewImage = ref('')
-const imageFile = ref(null)
+const previewImages = ref([])
+const imageFiles = ref([])
 
 const formData = ref({
   name: '',
@@ -163,21 +166,26 @@ const formData = ref({
 })
 
 const handleImageUpload = (event) => {
-  const file = event.target.files[0]
-  if (file) {
-    imageFile.value = file
+  const files = Array.from(event.target.files)
+  const remainingSlots = 5 - imageFiles.value.length
+  const filesToAdd = files.slice(0, remainingSlots)
+  
+  filesToAdd.forEach(file => {
+    imageFiles.value.push(file)
     const reader = new FileReader()
     reader.onload = (e) => {
-      previewImage.value = e.target.result
+      previewImages.value.push(e.target.result)
     }
     reader.readAsDataURL(file)
-  }
+  })
+  
+  // 清空文件输入，以便可以重复选择相同的文件
+  document.getElementById('images').value = ''
 }
 
-const removeImage = () => {
-  imageFile.value = null
-  previewImage.value = ''
-  document.getElementById('image').value = ''
+const removeImage = (index) => {
+  imageFiles.value.splice(index, 1)
+  previewImages.value.splice(index, 1)
 }
 
 const handleSubmit = async () => {
@@ -192,9 +200,11 @@ const handleSubmit = async () => {
     form.append('condition', formData.value.condition)
     form.append('tradeMethod', formData.value.tradeMethod)
     form.append('tradeAddress', formData.value.tradeAddress)
-    if (imageFile.value) {
-      form.append('image', imageFile.value)
-    }
+    
+    // 添加多个图片文件
+    imageFiles.value.forEach((file, index) => {
+      form.append('images', file)
+    })
     
     const response = await api.post('/products', form, {
       headers: {
@@ -281,19 +291,31 @@ const handleSubmit = async () => {
   margin-top: 4px;
 }
 
-.image-preview {
+.images-preview {
   margin-top: 12px;
   display: flex;
-  align-items: center;
   gap: 12px;
+  flex-wrap: wrap;
 }
 
-.image-preview img {
+.image-preview-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.image-preview-item img {
   width: 100px;
   height: 100px;
   object-fit: cover;
   border-radius: 8px;
   border: 2px solid var(--border-color);
+}
+
+.image-preview-item .btn {
+  width: 100px;
+  text-align: center;
 }
 
 .form-actions {
