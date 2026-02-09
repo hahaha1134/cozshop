@@ -188,12 +188,19 @@ onMounted(async () => {
   if (!authStore.user || authStore.user.role !== 'admin') {
     alert('您没有权限访问管理后台')
     router.push('/')
+    loading.value = false
     return
   }
   
-  await fetchSystemStatus()
-  await fetchSystemStats()
-  await fetchAnnouncements()
+  try {
+    await fetchSystemStatus()
+    await fetchSystemStats()
+    await fetchAnnouncements()
+  } catch (error) {
+    console.error('Failed to load system data:', error)
+  } finally {
+    loading.value = false
+  }
 })
 
 const fetchSystemStatus = async () => {
