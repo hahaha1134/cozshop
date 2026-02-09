@@ -165,7 +165,14 @@ async def get_my_products(user_id: str = Depends(get_current_user)):
 async def get_product(product_id: str):
     db = get_database()
     try:
-        product = await db.products.find_one({"_id": ObjectId(product_id)})
+        # Only show approved products or products without status
+        product = await db.products.find_one({
+            "_id": ObjectId(product_id),
+            "$or": [
+                {"status": "approved"},
+                {"status": {"$exists": False}}
+            ]
+        })
     except:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
