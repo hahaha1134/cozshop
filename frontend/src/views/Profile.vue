@@ -196,7 +196,9 @@
                 <span>¥{{ order.totalPrice.toFixed(2) }}</span>
               </div>
               <div class="order-actions">
-                <button class="btn btn-secondary btn-sm">查看详情</button>
+                <button class="btn btn-secondary btn-sm" @click="viewOrderDetails(order.id)">
+                  查看详情
+                </button>
                 <button v-if="order.status === 'pending'" class="btn btn-danger btn-sm">取消订单</button>
                 <button v-if="order.status === 'shipped'" class="btn btn-success btn-sm">确认收货</button>
               </div>
@@ -318,7 +320,9 @@
             </div>
             <div class="review-footer">
               <span class="review-date">{{ formatDate(review.created_at) }}</span>
-              <button class="btn btn-secondary btn-sm">查看订单</button>
+              <button class="btn btn-secondary btn-sm" @click="viewProduct(review.product_id)">
+                查看商品
+              </button>
             </div>
           </div>
         </div>
@@ -608,13 +612,20 @@ const goToProduct = (productId) => {
   router.push(`/product/${productId}`)
 }
 
+const viewOrderDetails = (orderId) => {
+  router.push(`/order/${orderId}`)
+}
+
+const viewProduct = (productId) => {
+  router.push(`/product/${productId}`)
+}
+
 // 获取我的评价
 const fetchReviews = async () => {
   try {
     loadingReviews.value = true
-    // 这里需要实现获取评价的API调用
-    // 由于后端暂时没有实现评价列表接口，这里只做模拟数据
-    reviews.value = []
+    const response = await api.get('/reviews')
+    reviews.value = response.data
   } catch (error) {
     console.error('Fetch reviews failed:', error)
   } finally {

@@ -137,3 +137,28 @@ async def delete_review(review_id: str, user_id: str = Depends(get_current_user)
     )
     
     return {"message": "Review deleted successfully"}
+
+@router.get("", response_model=List[ReviewResponse])
+async def get_my_reviews(user_id: str = Depends(get_current_user)):
+    db = get_database()
+    
+    reviews = await db.reviews.find({"user_id": user_id}).to_list(length=100)
+    reviews.sort(key=lambda x: x["created_at"], reverse=True)
+    
+    # Get product names for each review
+    review_list = []
+    for review in reviews:
+        # Get product details
+        product = await db.products.find_one({"_id": ObjectId(review["product_id"])})
+        review_dict = {
+            "id": str(review["_id"]),
+            "user_id": review["user_id"],
+            "product_id": review["product_id"],
+            "product_name": product.get("name", "未知商品") if product else "未知商品",
+            "rating": review["rating"],
+            "comment": review["comment"],
+            "created_at": review["created_at"]
+        }
+        review_list.append(review_dict)
+    
+    return review_list
