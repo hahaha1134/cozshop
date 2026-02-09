@@ -36,8 +36,8 @@ async def get_product_reviews(product_id: str):
     ]
 
 @router.post("", response_model=ReviewResponse, status_code=status.HTTP_201_CREATED)
-async def create_review(review: ReviewCreate):
-    """Simplified review creation for testing"""
+async def create_review(review: ReviewCreate, user_id: str = Depends(get_current_user)):
+    """Create review for current user"""
     db = get_database()
     
     try:
@@ -49,9 +49,9 @@ async def create_review(review: ReviewCreate):
                 detail="Product not found"
             )
         
-        # Create review with hardcoded user_id for testing
+        # Create review with current user_id
         review_dict = review.model_dump()
-        review_dict["user_id"] = "69830ca91c2d724587bbbb02"  # Admin user ID
+        review_dict["user_id"] = user_id
         review_dict["created_at"] = datetime.utcnow()
         
         result = await db.reviews.insert_one(review_dict)
@@ -138,7 +138,7 @@ async def delete_review(review_id: str, user_id: str = Depends(get_current_user)
     
     return {"message": "Review deleted successfully"}
 
-@router.get("", response_model=List[ReviewResponse])
+@router.get("")
 async def get_my_reviews(user_id: str = Depends(get_current_user)):
     db = get_database()
     
@@ -149,12 +149,17 @@ async def get_my_reviews(user_id: str = Depends(get_current_user)):
     review_list = []
     for review in reviews:
         # Get product details
-        product = await db.products.find_one({"_id": ObjectId(review["product_id"])})
+        try:
+            product = await db.products.find_one({"_id": ObjectId(review["product_id"])})
+            product_name = product.get("name", "未知商品") if product else "未知商品"
+        except:
+            product_name = "未知商品"
+        
         review_dict = {
             "id": str(review["_id"]),
             "user_id": review["user_id"],
             "product_id": review["product_id"],
-            "product_name": product.get("name", "未知商品") if product else "未知商品",
+            "product_name": product_name,
             "rating": review["rating"],
             "comment": review["comment"],
             "created_at": review["created_at"]
