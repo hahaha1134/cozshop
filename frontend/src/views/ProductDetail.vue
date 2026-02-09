@@ -14,11 +14,28 @@
       <div class="product-content">
         <div class="product-image-section">
           <img 
-            :src="product.image || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAwIiBoZWlnaHQ9IjQwMCIgdmlld0JveD0iMCAwIDUwMCA0MDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI1MDAiIGhlaWdodD0iNDAwIiBmaWxsPSIjZjBmMGMwIi8+CjxwYXRoIGQ9Ik0yNTAgMjUwIEMzMjcuNjEgMjUwIDM3NSAxNzIuNjEgMzc1IDEwNSBDMzc1IDM3LjM5IDMyNy42MSAwIDI1MCAwIEMxNzIuMzkgMCAxMjUgMzcuMzkgMTI1IDEwNSBDMTI1IDE3Mi42MSAxNzIuMzkgMjUwIDI1MCAyNTAiIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4yIi8+Cjx0ZXh0IHg9IjI1MCIgeT0iMjE1IiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiMwMDAiPk5vIEltYWdlPC90ZXh0Pgo8L3N2Zz4='" 
+            :src="currentImage || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAwIiBoZWlnaHQ9IjQwMCIgdmlld0JveD0iMCAwIDUwMCA0MDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI1MDAiIGhlaWdodD0iNDAwIiBmaWxsPSIjZjBmMGMwIi8+CjxwYXRoIGQ9Ik0yNTAgMjUwIEMzMjcuNjEgMjUwIDM3NSAxNzIuNjEgMzc1IDEwNSBDMzc1IDM3LjM5IDMyNy42MSAwIDI1MCAwIEMxNzIuMzkgMCAxMjUgMzcuMzkgMTI1IDEwNSBDMTI1IDE3Mi42MSAxNzIuMzkgMjUwIDI1MCAyNTAiIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4yIi8+Cjx0ZXh0IHg9IjI1MCIgeT0iMjE1IiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiMwMDAiPk5vIEltYWdlPC90ZXh0Pgo8L3N2Zz4='" 
             :alt="product.name" 
             class="product-image"
             @error="$event.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAwIiBoZWlnaHQ9IjQwMCIgdmlld0JveD0iMCAwIDUwMCA0MDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI1MDAiIGhlaWdodD0iNDAwIiBmaWxsPSIjZjBmMGMwIi8+CjxwYXRoIGQ9Ik0yNTAgMjUwIEMzMjcuNjEgMjUwIDM3NSAxNzIuNjEgMzc1IDEwNSBDMzc1IDM3LjM5IDMyNy42MSAwIDI1MCAwIEMxNzIuMzkgMCAxMjUgMzcuMzkgMTI1IDEwNSBDMTI1IDE3Mi42MSAxNzIuMzkgMjUwIDI1MCAyNTAiIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4yIi8+Cjx0ZXh0IHg9IjI1MCIgeT0iMjE1IiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiMwMDAiPk5vIEltYWdlPC90ZXh0Pgo8L3N2Zz4='" 
           />
+          
+          <!-- 图片缩略图预览 -->
+          <div v-if="allImages.length > 1" class="image-thumbnails">
+            <div 
+              v-for="(img, index) in allImages" 
+              :key="index"
+              class="image-thumbnail"
+              :class="{ active: currentImageIndex === index }"
+              @click="selectImage(index)"
+            >
+              <img 
+                :src="img" 
+                :alt="`${product.name} 图片 ${index + 1}`"
+                @error="$event.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjZjBmMGMwIi8+CjxwYXRoIGQ9Ik01MCA1MCBDNjcuNjEgNTAgODUgMzIuNjEgODUgMTUgQzE3NSAxNSA2Ny42MSAwIDUwIDAgQzMxLjM5IDAgMTUgMTcuMzkgMTUgNTAgQzE1IDgyLjYxIDMxLjM5IDEwMCA1MCAxMDAiIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4yIi8+Cjx0ZXh0IHg9IjUwIiB5PSI2NSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEwIiBmaWxsPSIjMDAwIj5ObzwvdGV4dD4KPC9zdmc+'"
+              />
+            </div>
+          </div>
         </div>
         
         <div class="product-details">
