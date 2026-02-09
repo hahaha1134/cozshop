@@ -5,7 +5,6 @@ from datetime import datetime, timedelta
 from bson import ObjectId
 
 router = APIRouter(prefix="/api/system", tags=["System"])
-
 @router.get("/status")
 async def get_system_status(admin_id: str = Depends(get_current_admin)):
     db = get_database()
