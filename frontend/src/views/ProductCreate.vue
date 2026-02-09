@@ -96,11 +96,15 @@
               <label for="image">商品图片</label>
               <input 
                 id="image" 
-                type="text" 
-                v-model="formData.image" 
-                placeholder="请输入图片URL"
+                type="file" 
+                accept="image/*" 
+                @change="handleImageUpload"
               />
-              <p class="form-hint">可以使用图片托管服务获取图片URL</p>
+              <div v-if="previewImage" class="image-preview">
+                <img :src="previewImage" alt="预览图片" />
+                <button type="button" class="btn btn-sm btn-danger" @click="removeImage">移除图片</button>
+              </div>
+              <p class="form-hint">请选择本地图片文件上传</p>
             </div>
           </div>
           
@@ -144,6 +148,8 @@ import api from '@/utils/api'
 
 const router = useRouter()
 const loading = ref(false)
+const previewImage = ref('')
+const imageFile = ref(null)
 
 const formData = ref({
   name: '',
@@ -151,16 +157,50 @@ const formData = ref({
   price: 0,
   category: '',
   stock: 1,
-  image: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDMwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjZjBmMGMwIi8+CjxwYXRoIGQ9Ik0xNTAgMTUwIEMxNzcuNjEgMTUwIDE5NSAxMzIuNjEgMTk1IDEwNSBDMTk1IDc3LjM5IDE3Ny42MSA2MCAxNTAgNjAgQzEyMi4zOSA2MCAxMDUgNzcuMzkgMTA1IDEwNSBDMTA1IDEzMi42MSAxMjIuMzkgMTUwIDE1MCAxNTAiIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4yIi8+Cjx0ZXh0IHg9IjE1MCIgeT0iMTY1IiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiMwMDAiPk5vIEltYWdlPC90ZXh0Pgo8L3N2Zz4=',
   condition: '',
   tradeMethod: '',
   tradeAddress: ''
 })
 
+const handleImageUpload = (event) => {
+  const file = event.target.files[0]
+  if (file) {
+    imageFile.value = file
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      previewImage.value = e.target.result
+    }
+    reader.readAsDataURL(file)
+  }
+}
+
+const removeImage = () => {
+  imageFile.value = null
+  previewImage.value = ''
+  document.getElementById('image').value = ''
+}
+
 const handleSubmit = async () => {
   loading.value = true
   try {
-    const response = await api.post('/products', formData.value)
+    const form = new FormData()
+    form.append('name', formData.value.name)
+    form.append('description', formData.value.description)
+    form.append('price', formData.value.price)
+    form.append('category', formData.value.category)
+    form.append('stock', formData.value.stock)
+    form.append('condition', formData.value.condition)
+    form.append('tradeMethod', formData.value.tradeMethod)
+    form.append('tradeAddress', formData.value.tradeAddress)
+    if (imageFile.value) {
+      form.append('image', imageFile.value)
+    }
+    
+    const response = await api.post('/products', form, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
     alert('商品发布成功！')
     router.push('/profile')
   } catch (error) {
@@ -239,6 +279,21 @@ const handleSubmit = async () => {
   font-size: 12px;
   color: var(--text-secondary);
   margin-top: 4px;
+}
+
+.image-preview {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.image-preview img {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 2px solid var(--border-color);
 }
 
 .form-actions {

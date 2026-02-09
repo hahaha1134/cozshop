@@ -1,8 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from contextlib import asynccontextmanager
 from database import connect_to_mongo, close_mongo_connection
 from routers import auth, products, cart, orders, reviews, favorites, users, system
+import os
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -18,6 +20,14 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan
 )
+
+# 确保上传目录存在
+UPLOAD_DIR = "uploads"
+if not os.path.exists(UPLOAD_DIR):
+    os.makedirs(UPLOAD_DIR)
+
+# 挂载静态文件目录
+app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 
 # CORS middleware
 app.add_middleware(

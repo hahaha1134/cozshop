@@ -1,10 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Body
-from typing import List, Optional
+from fastapi import APIRouter, Depends, HTTPException, status, Body, UploadFile, File, Form
+from typing import List, Optional, Union
 from models import ProductCreate, ProductUpdate, ProductResponse
 from database import get_database
 from auth import get_current_user, get_current_admin
 from bson import ObjectId
 from datetime import datetime
+import os
+import uuid
 
 router = APIRouter(prefix="/api/products", tags=["Products"])
 
@@ -192,14 +194,61 @@ async def get_product(product_id: str):
         is_pinned=product.get("is_pinned", False)
     )
 
+# 确保上传目录存在
+UPLOAD_DIR = "uploads"
+if not os.path.exists(UPLOAD_DIR):
+    os.makedirs(UPLOAD_DIR)
+
 @router.post("", response_model=ProductResponse, status_code=status.HTTP_201_CREATED)
-async def create_product(product: ProductCreate, user_id: str = Depends(get_current_user)):
+async def create_product(
+    name: str = Form(...),
+    description: str = Form(...),
+    price: float = Form(...),
+    category: str = Form(...),
+    stock: int = Form(...),
+    condition: str = Form(...),
+    tradeMethod: str = Form(...),
+    tradeAddress: str = Form(...),
+    image: Optional[UploadFile] = File(None),
+    user_id: str = Depends(get_current_user)
+):
     db = get_database()
-    product_dict = product.model_dump()
-    product_dict["created_at"] = datetime.utcnow()
-    product_dict["rating"] = 0
-    product_dict["numReviews"] = 0
-    product_dict["seller_id"] = user_id
+    
+    # 处理图片上传
+    image_url = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDMwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjZjBmMGMwIi8+CjxwYXRoIGQ9Ik0xNTAgMTUwIEMxNzcuNjEgMTUwIDE5NSAxMzIuNjEgMTk1IDEwNSBDMTk1IDc3LjM5IDE3Ny42MSA2MCAxNTAgNjAgQzEyMi4zOSA2MCAxMDUgNzcuMzkgMTA1IDEwNSBDMTA1IDEzMi42MSAxMjIuMzkgMTUwIDE1MCAxNTAiIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4yIi8+Cjx0ZXh0IHg9IjE1MCIgeT0iMTY1IiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiMwMDAiPk5vIEltYWdlPC90ZXh0Pgo8L3N2Zz4="
+    
+    if image:
+        # 生成唯一文件名
+        file_extension = os.path.splitext(image.filename)[1]
+        unique_filename = f"{uuid.uuid4()}{file_extension}"
+        file_path = os.path.join(UPLOAD_DIR, unique_filename)
+        
+        # 保存文件
+        try:
+            with open(file_path, "wb") as f:
+                content = await image.read()
+                f.write(content)
+            # 生成图片URL
+            image_url = f"/uploads/{unique_filename}"
+        except Exception as e:
+            print(f"Error saving image: {e}")
+    
+    # 创建产品字典
+    product_dict = {
+        "name": name,
+        "description": description,
+        "price": price,
+        "category": category,
+        "stock": stock,
+        "condition": condition,
+        "tradeMethod": tradeMethod,
+        "tradeAddress": tradeAddress,
+        "image": image_url,
+        "created_at": datetime.utcnow(),
+        "rating": 0,
+        "numReviews": 0,
+        "seller_id": user_id
+    }
     
     result = await db.products.insert_one(product_dict)
     created_product = await db.products.find_one({"_id": result.inserted_id})
@@ -211,10 +260,12 @@ async def create_product(product: ProductCreate, user_id: str = Depends(get_curr
         price=created_product["price"],
         category=created_product["category"],
         stock=max(created_product["stock"], 0),
-        image=created_product.get("image", "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDMwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjZjBmMGMwIi8+CjxwYXRoIGQ9Ik0xNTAgMTUwIEMxNzcuNjEgMTUwIDE5NSAxMzIuNjEgMTk1IDEwNSBDMTk1IDc3LjM5IDE3Ny42MSA2MCAxNTAgNjAgQzEyMi4zOSA2MCAxMDUgNzcuMzkgMTA1IDEwNSBDMTA1IDEzMi42MSAxMjIuMzkgMTUwIDE1MCAxNTAiIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4yIi8+Cjx0ZXh0IHg9IjE1MCIgeT0iMTY1IiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiMwMDAiPk5vIEltYWdlPC90ZXh0Pgo8L3N2Zz4="),
+        image=created_product.get("image", "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDMwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjZjBmMGMwIi8+CjxwYXRoIGQ9Ik0xNTAgMTUwIEMxNzcuNjEgMTUwIDE5NSAxMzIuNjEgMTk1IDEwNSBDMTk1IDc3LjM5IDE3Ny42MSA2MCAxNTAgNjAgQzEyMi4zOSA2MCAxMDUgNzcuMzkgMTA1IDEwNSBDMTA1IDEzMi42MSAxMjIuMzkgMTUwIDE1MCAxNTAiIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4yIi8+Cjx0ZXh0IHg9IjEwMCIgeT0iMTY1IiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiMwMDAiPk5vIEltYWdlPC90ZXh0Pgo8L3N2Zz4="),
         rating=created_product.get("rating", 0),
         numReviews=created_product.get("numReviews", 0),
         created_at=created_product["created_at"],
+        status=created_product.get("status", "pending"),
+        seller_id=created_product.get("seller_id"),
         is_pinned=created_product.get("is_pinned", False)
     )
 
