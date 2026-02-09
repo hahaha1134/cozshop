@@ -33,6 +33,12 @@ const routes = [
     meta: { title: '我的订单 - CozShop', requiresAuth: true }
   },
   {
+    path: '/order/:id',
+    name: 'OrderDetail',
+    component: () => import('@/views/OrderDetail.vue'),
+    meta: { title: '订单详情 - CozShop', requiresAuth: true }
+  },
+  {
     path: '/profile',
     name: 'Profile',
     component: () => import('@/views/Profile.vue'),

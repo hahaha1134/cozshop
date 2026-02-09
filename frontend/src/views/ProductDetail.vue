@@ -84,6 +84,13 @@
             </button>
             <button 
               class="btn btn-secondary btn-lg"
+              @click="buyNow"
+              :disabled="!authStore.isAuthenticated || product.stock === 0"
+            >
+              {{ authStore.isAuthenticated ? '立即购买' : '请先登录' }}
+            </button>
+            <button 
+              class="btn btn-outline-danger btn-lg"
               @click="toggleFavorite"
               :disabled="!authStore.isAuthenticated"
               :class="{ 'btn-danger': isFavorite }"
@@ -164,6 +171,31 @@ const reviews = ref([])
 const reviewRating = ref(5)
 const reviewComment = ref('')
 const isFavorite = ref(false)
+const currentImageIndex = ref(0)
+
+const allImages = computed(() => {
+  if (!product.value) return []
+  const images = []
+  if (product.value.image) {
+    images.push(product.value.image)
+  }
+  if (product.value.images && Array.isArray(product.value.images)) {
+    product.value.images.forEach(img => {
+      if (img && !images.includes(img)) {
+        images.push(img)
+      }
+    })
+  }
+  return images
+})
+
+const currentImage = computed(() => {
+  return allImages.value[currentImageIndex.value] || product.value?.image
+})
+
+const selectImage = (index) => {
+  currentImageIndex.value = index
+}
 
 const fetchProduct = async () => {
   try {
@@ -192,6 +224,19 @@ const addToCart = async () => {
   } catch (error) {
     console.error('Failed to add to cart:', error)
     alert('添加失败，请重试')
+  }
+}
+
+const buyNow = async () => {
+  try {
+    // 清空购物车并添加当前商品
+    await cartStore.clearCart()
+    await cartStore.addToCart(product.value, quantity.value)
+    // 跳转到结账页面
+    router.push('/checkout')
+  } catch (error) {
+    console.error('Failed to buy now:', error)
+    alert('操作失败，请重试')
   }
 }
 
@@ -294,6 +339,39 @@ onMounted(() => {
   width: 100%;
   border-radius: 12px;
   box-shadow: var(--shadow-lg);
+}
+
+.image-thumbnails {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+
+.image-thumbnail {
+  flex: 0 0 80px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.image-thumbnail:hover {
+  border-color: var(--primary-color);
+  transform: translateY(-2px);
+}
+
+.image-thumbnail.active {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.image-thumbnail img {
+  width: 100%;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 6px;
 }
 
 .product-details {

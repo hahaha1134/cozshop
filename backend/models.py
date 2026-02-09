@@ -92,6 +92,7 @@ class ShippingAddress(BaseModel):
     city: Optional[str] = ""
     postalCode: Optional[str] = ""
     country: Optional[str] = ""
+    phone: Optional[str] = ""
 
 class OrderItem(BaseModel):
     name: str
@@ -106,6 +107,7 @@ class OrderCreate(BaseModel):
 
 class OrderResponse(BaseModel):
     id: str
+    orderNumber: Optional[str] = ""
     user_id: str
     orderItems: List[OrderItem]
     shippingAddress: Optional[ShippingAddress] = ShippingAddress()

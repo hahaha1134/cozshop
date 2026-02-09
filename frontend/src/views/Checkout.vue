@@ -97,6 +97,17 @@
             </div>
             
             <div class="form-group">
+              <label for="phone">手机号码</label>
+              <input
+                id="phone"
+                v-model="orderData.shippingAddress.phone"
+                type="tel"
+                required
+                placeholder="请输入手机号码"
+              />
+            </div>
+            
+            <div class="form-group">
               <label for="paymentMethod">支付方式</label>
               <select
                 id="paymentMethod"
@@ -140,7 +151,8 @@ const orderData = ref({
     address: '',
     city: '',
     postalCode: '',
-    country: ''
+    country: '',
+    phone: ''
   },
   paymentMethod: 'Credit Card'
 })
@@ -151,7 +163,7 @@ const handleCheckout = async () => {
     const response = await api.post('/orders', orderData.value)
     
     await cartStore.clearCart()
-    router.push(`/orders`)
+    router.push(`/order/${response.data.id}`)
   } catch (error) {
     console.error('Checkout failed:', error)
     alert('提交订单失败，请重试')

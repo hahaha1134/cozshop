@@ -21,7 +21,7 @@
         >
           <div class="order-header">
             <div class="order-info">
-              <span class="order-id">订单号: {{ order.id }}</span>
+              <span class="order-id">订单号: {{ order.orderNumber || order.id }}</span>
               <span class="order-date">{{ formatDate(order.created_at) }}</span>
             </div>
             <span :class="['order-status', `status-${order.status}`]">
@@ -55,7 +55,9 @@
               <span>¥{{ order.totalPrice.toFixed(2) }}</span>
             </div>
             <div class="order-actions">
-              <button class="btn btn-secondary btn-sm">查看详情</button>
+              <router-link :to="`/order/${order.id}`" class="btn btn-secondary btn-sm">
+                查看详情
+              </router-link>
             </div>
           </div>
         </div>
