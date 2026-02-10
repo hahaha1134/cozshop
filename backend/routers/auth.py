@@ -19,8 +19,10 @@ async def register(user: UserCreate):
             detail="Email already registered"
         )
     
-    # Create new user (no password hashing)
+    # Create new user with password hashing
     user_dict = user.model_dump()
+    from auth import get_password_hash
+    user_dict["password"] = get_password_hash(user_dict["password"])
     user_dict["role"] = "user"
     user_dict["status"] = "active"
     user_dict["created_at"] = datetime.utcnow()
@@ -50,12 +52,12 @@ async def register(user: UserCreate):
 async def login(user: UserLogin):
     db = get_database()
     
-    # Simplified: no password verification
+    # Find user by email
     user_data = await db.users.find_one({"email": user.email})
     if not user_data:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="User not found",
+            detail="Incorrect email or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
     
@@ -64,6 +66,15 @@ async def login(user: UserLogin):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Account has been disabled",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    # Verify password
+    from auth import verify_password
+    if not verify_password(user.password, user_data.get("password", "")):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect email or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
     

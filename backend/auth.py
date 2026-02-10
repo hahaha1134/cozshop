@@ -1,7 +1,20 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from passlib.context import CryptContext
 
 security = HTTPBearer()
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+def get_password_hash(password: str) -> str:
+    return pwd_context.hash(password)
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    try:
+        # 尝试使用哈希验证
+        return pwd_context.verify(plain_password, hashed_password)
+    except Exception:
+        # 如果哈希验证失败，尝试直接比较明文密码（向后兼容）
+        return plain_password == hashed_password
 
 async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
     # Simplified: use token directly as user_id
